@@ -1,11 +1,16 @@
+import { StyleSheet } from "react-native";
+import { Text } from "react-native-paper";
+import { width } from "../constants/measures";
+import { TouchableOpacity } from "react-native-gesture-handler";
+
 export default function ListItem(props) {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{props.title ?? "Item title"}</Text>
+    <TouchableOpacity style={styles.container}>
+      <Text style={styles.title}>{props.data.title ?? "Item title"}</Text>
       <Text style={styles.description}>
-        {props.description ?? "Description of the item"}
+        {props.data.description ?? "Description of the item"}
       </Text>
-    </View>
+    </TouchableOpacity>
   );
 }
 
@@ -13,10 +18,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-    width: width * 0.2,
-    height: height * 0.2,
+    alignItems: "flex-start", // Align items to the left
+    width: width * 0.9,
+    height: "100%",
+    marginBottom: 12,
+    borderWidth: 2,
+    padding: 16,
+    borderRadius: 8,
+    display: "flex",
   },
   title: {
     fontSize: 24,

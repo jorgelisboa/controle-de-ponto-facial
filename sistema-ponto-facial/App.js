@@ -1,18 +1,26 @@
 import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createStackNavigator } from "@react-navigation/stack";
 import MainScreen from "./src/screens/MainScreen";
-import { SafeAreaView } from "react-native-safe-area-context";
+import SimpleList from "./src/screens/Login";
+import { SafeAreaView, StyleSheet } from "react-native";
 
-const Stack = createNativeStackNavigator();
+const Stack = createStackNavigator();
 
 export default function App() {
   return (
-    <NavigationContainer>
-      <Stack.Navigator>
-        <SafeAreaView>
-          <Stack.Screen name="Home" component={MainScreen} />
-        </SafeAreaView>
-      </Stack.Navigator>
-    </NavigationContainer>
+    <SafeAreaView style={styles.safeArea}>
+      <NavigationContainer>
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="MainScreen" component={MainScreen} />
+          <Stack.Screen name="SimpleList" component={SimpleList} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
+});
