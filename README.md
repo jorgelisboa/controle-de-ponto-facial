@@ -66,3 +66,13 @@ cd sistema-ponto-facial-backend
 ```
 
 5. Pronto, o backend estará rodando no endereço `localhost`.
+6. Api está disponível em `localhost/api`.
+7. Healthcheck está disponível em `localhost/api/health`.
+
+#### Cheatset para laravel
+- Criar ApiController `./vendor/bin/sail artisan make:controller ControllerNameController --api`
+- Criar Model `./vendor/bin/sail artisan make:model ModelName`
+- Criar Tabela `./vendor/bin/sail artisan make:migration create_table_name_table`
+- Update tabela já existentes `./vendor/bin/sail artisan make:migration add_column_name_to_table_name_table`
+- Rodar Migrations `./vendor/bin/sail artisan migrate`
+- Listar rotas `./vendor/bin/sail artisan route:list`
