@@ -30,7 +30,7 @@ class CollaboratorController extends Controller
                 'hourly_value' => 'required|numeric',
                 'estimated_journey' => 'required|numeric',
             ]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             return response()->json(['message' => 'error', 'error' => $e->errors()], 400);
         }
 
