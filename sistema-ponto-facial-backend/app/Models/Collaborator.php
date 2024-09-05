@@ -20,4 +20,9 @@ class Collaborator extends Model
         'hourly_value',
         'estimated_journey'
     ];
+
+    public function faces()
+    {
+        return $this->hasMany(Face::class);
+    }
 }

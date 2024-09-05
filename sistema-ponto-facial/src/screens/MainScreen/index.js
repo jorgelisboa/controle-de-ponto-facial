@@ -2,9 +2,12 @@ import { StyleSheet, View } from "react-native";
 import { height, width } from "../../constants/measures";
 import SimpleList from "../../components/SimpleList";
 import { useState } from "react";
+import HeatMap from "../../components/HeatMap";
+import TopArea from "../../components/TopArea";
+import { FAB } from "react-native-paper";
+import BaterPonto from "../../components/BaterPonto";
 
 export default function MainScreen() {
-
   const [data, setData] = useState([
     {
       id: "1",
@@ -18,15 +21,11 @@ export default function MainScreen() {
     },
   ]);
 
-
   return (
     <View style={styles.container}>
-      {/* TOP AREA pra mensagem */}
-
-      <SimpleList
-        title="Histórico de pontos"
-        data={data}
-      />
+      <TopArea />
+      <HeatMap />
+      <BaterPonto />
     </View>
   );
 }
@@ -34,7 +33,7 @@ export default function MainScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#faf",
+    backgroundColor: "#FFF",
     alignItems: "center",
     justifyContent: "center",
     width: width,
