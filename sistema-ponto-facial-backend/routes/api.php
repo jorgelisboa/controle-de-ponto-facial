@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\WorkShiftController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -11,13 +12,9 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-Route::get('/', function () {
-    return response()->json(['message' => 'Sistema de Ponto Facial']);
-});
-
 Route::post('/tokens/create', function (Request $request) {
     $token = $request->user()->createToken($request->token_name);
- 
+
     return ['token' => $token->plainTextToken];
 });
 
@@ -26,3 +23,5 @@ Route::get('/health', function () {
 });
 
 Route::apiResource('collaborators', CollaboratorController::class);
+
+Route::apiResource('shifts', WorkShiftController::class);

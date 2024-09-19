@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Collaborator;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use \Illuminate\Validation\ValidationException;
 class CollaboratorController extends Controller
@@ -10,9 +11,10 @@ class CollaboratorController extends Controller
     /**
      * Display a listing of the collaborators.
      */
-    public function index()
+    public function index(): JsonResponse
     {
-        return response()->json(['message' => 'success', 'collaborators' => Collaborator::all()], 200);
+        $colabs = Collaborator::all();
+        return response()->json(['message' => 'success', 'size' => count($colabs),'collaborators' => $colabs], 200);
     }
 
     /**

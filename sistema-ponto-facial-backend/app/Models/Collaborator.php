@@ -21,8 +21,9 @@ class Collaborator extends Model
         'estimated_journey'
     ];
 
-    public function faces()
-    {
-        return $this->hasMany(Face::class);
-    }
+    protected $casts = [
+        'document' => 'string',
+        "hourly_value" => 'float',
+        "estimated_journey" => 'int'
+    ];
 }

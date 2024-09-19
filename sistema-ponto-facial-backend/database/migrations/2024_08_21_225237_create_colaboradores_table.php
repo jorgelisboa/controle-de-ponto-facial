@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('document')->unique()->primary();
             $table->string('email')->unique();
             $table->string('role');
-            $table->string('hourly_value');
+            $table->float('hourly_value' , 2);
             $table->string('estimated_journey');
             $table->timestamps();
         });
