@@ -8,6 +8,89 @@ use \Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
 use Response;
 
+function calcularIntervalosPorMes($dados) {
+    $intervalosPorMes = [];
+
+    // Agrupar os objetos por mês e dia com base no campo created_at
+    foreach ($dados as $objeto) {
+        $timestamp = $objeto["created_at"];
+        $mes = date('Y-m', strtotime($timestamp));
+        $data = date('Y-m-d', strtotime($timestamp));
+
+        // Agrupa por mês
+        if (!isset($intervalosPorMes[$mes])) {
+            $intervalosPorMes[$mes] = [];
+        }
+
+        // Agrupa por data dentro do mês
+        if (!isset($intervalosPorMes[$mes][$data])) {
+            $intervalosPorMes[$mes][$data] = [];
+        }
+
+        $intervalosPorMes[$mes][$data][] = $timestamp;
+    }
+
+    $resultados = [];
+
+    // Para cada mês, calcular a soma dos intervalos por dia
+    foreach ($intervalosPorMes as $mes => $dias) {
+        $mesTrabalho = [];
+        $totalSegundosMes = 0; // Acumulador para o total de segundos do mês
+
+        foreach ($dias as $dia => $timestampsDoDia) {
+            // Ignorar o dia se não tiver um número par de timestamps
+            if (count($timestampsDoDia) % 2 != 0) {
+                continue;
+            }
+
+            $totalSegundos = 0;
+
+            // Ordena os timestamps do dia
+            sort($timestampsDoDia);
+
+            // Calcula a diferença entre pares de timestamps
+            for ($i = 0; $i < count($timestampsDoDia) - 1; $i += 2) {
+                $inicio = strtotime($timestampsDoDia[$i]);
+                $fim = strtotime($timestampsDoDia[$i + 1]);
+
+                // Calcula a diferença e adiciona ao total de segundos
+                $totalSegundos += ($fim - $inicio);
+            }
+
+            // Adiciona ao total do mês
+            $totalSegundosMes += $totalSegundos;
+
+            // Converte o total de segundos para horas, minutos e segundos
+            $horas = floor($totalSegundos / 3600);
+            $minutos = floor(($totalSegundos % 3600) / 60);
+            $segundos = $totalSegundos % 60;
+
+            // Adiciona os valores para a data atual
+            $mesTrabalho[] = [
+                'date' => $dia,
+                'worked' => [$horas, $minutos, $segundos],
+            ];
+        }
+
+        // Converte o total de segundos do mês para horas, minutos e segundos
+        $totalHorasMes = floor($totalSegundosMes / 3600);
+        $totalMinutosMes = floor(($totalSegundosMes % 3600) / 60);
+        $totalSegundosMesFinal = $totalSegundosMes % 60;
+
+        // Só adiciona o mês se houver trabalho calculado
+        if (!empty($mesTrabalho)) {
+            $resultados[$mes] = [
+                'days' => $mesTrabalho,
+                'total_worked' => [$totalHorasMes, $totalMinutosMes, $totalSegundosMesFinal],
+            ];
+        }
+    }
+
+    return $resultados;
+}
+
+
+
 class WorkShiftController extends Controller
 {
     /**
@@ -23,9 +106,23 @@ public function index(Request $request)
         if ($collaborator) {
             $workShifts = WorkShift::where('collaborator_document', $request->collaborator_document)->get();
 
+            /**
+             * Pega cada item do workshifts e subtrai o tempo um do outro
+             * Exemplo:
+             * [
+             * "2024-09-19T04:02:55.000000Z",
+             * "2024-09-19T04:26:45.000000Z",
+             * ...
+             * ]
+             *
+             * Retornando 23:50
+             */
+            $totalTrabalhado = calcularIntervalosPorMes($workShifts);
+
             return [
                 'message' => 'success',
                 'collaborator' => $collaborator,  // Retorna as informações do colaborador uma vez
+                'worked_time' => $totalTrabalhado,
                 'workShifts' => $workShifts        // Apenas os turnos de trabalho
             ];
         }
