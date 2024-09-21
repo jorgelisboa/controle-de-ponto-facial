@@ -122,8 +122,7 @@ public function index(Request $request)
             return [
                 'message' => 'success',
                 'collaborator' => $collaborator,  // Retorna as informações do colaborador uma vez
-                'worked_time' => $totalTrabalhado,
-                'workShifts' => $workShifts        // Apenas os turnos de trabalho
+                'worked_time' => $totalTrabalhado
             ];
         }
 
