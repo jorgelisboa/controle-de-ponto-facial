@@ -13,17 +13,17 @@ export default function CustomHeatMap({
 }) {
   return (
     <View style={styles.container}>
-      <HeatMap
+      {/* <HeatMap
         numberOfLines={numberOfLines}
         values={values}
         onBlockPress={onBlockPress}
-      />
+      /> */}
       <View style={styles.description}>
-        <HeatMap
+        {/* <HeatMap
           numberOfLines={1}
           values={[0, 1, 6, 100]}
           onBlockPress={onBlockPress}
-        />
+        /> */}
       </View>
     </View>
   );
