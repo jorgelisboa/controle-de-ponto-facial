@@ -74,6 +74,25 @@ cd sistema-ponto-facial-backend
 ./vendor/bin/sail php artisan migrate
 ```
 
+5. Rode os seeders:
+
+```bash
+./vendor/bin/sail php artisan db:seed
+```
+
+6. Caso precise refazer o banco e os seeders, rode:
+
+```bash
+./vendor/bin/sail artisan migrate:fresh --seed
+```
+
+ou, caso dê algum erro, rode:
+
+```bash
+./vendor/bin/sail artisan migrate:fresh
+./vendor/bin/sail artisan db:seed
+```
+
 5. Pronto, o backend estará rodando no endereço `localhost`.
 6. Api está disponível em `localhost/api`.
 7. Healthcheck está disponível em `localhost/api/health`.
