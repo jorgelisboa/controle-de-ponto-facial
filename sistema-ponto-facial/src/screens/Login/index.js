@@ -1,8 +1,8 @@
 import { StatusBar } from "expo-status-bar";
-import { Text, Button, TextInput, View } from "react-native-paper";
+import { Text, Button, TextInput } from "react-native-paper";
 import { width, height } from "../../constants/measures";
 import { login } from "../../constants/i18n/portuguese";
-import { StyleSheet } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 export default function Login(props) {
   return (

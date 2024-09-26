@@ -2,7 +2,6 @@ import { StyleSheet, View } from "react-native";
 import { height, width } from "../../constants/measures";
 import SimpleList from "../../components/SimpleList";
 import { useState } from "react";
-import HeatMap from "../../components/HeatMap";
 import Header from "../../components/Header/Header";
 import { FAB } from "react-native-paper";
 import BaterPonto from "../../components/BaterPonto";
@@ -47,7 +46,6 @@ export default function MainScreen() {
     <View style={styles.container}>
       <Header userName={'Jonathan'} userImage={'https://avatars.githubusercontent.com/u/113566274?v=4'} />
       <NotificationsList notifications={exampleNotifications}/>
-      <HeatMap />
       <BaterPonto />
     </View>
   );
