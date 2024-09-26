@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Collaborator;
+use App\Services\ColabCSVImportService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use \Illuminate\Validation\ValidationException;
@@ -14,14 +15,31 @@ class CollaboratorController extends Controller
     public function index(): JsonResponse
     {
         $colabs = Collaborator::all();
-        return response()->json(['message' => 'success', 'size' => count($colabs),'collaborators' => $colabs], 200);
+        return response()->json(['message' => 'success', 'size' => count($colabs), 'collaborators' => $colabs], 200);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+
+    protected $csvImporter;
+
+    public function __construct(ColabCSVImportService $csvImporter)
+    {
+        $this->csvImporter = $csvImporter;
+    }
+
     public function store(Request $request)
     {
+        // Verifica se o request é um arquivo CSV
+        if ($request->hasFile('file') && $request->file('file')->isValid()) {
+            // Utiliza o serviço para processar o arquivo CSV
+            $result = $this->csvImporter->import($request->file('file'));
+
+            if (!empty($result['errors'])) {
+                return response()->json(['message' => 'error', 'errors' => $result['errors']], 400);
+            }
+
+            return response()->json(['message' => 'success', 'collaborators' => $result['collaborators']], 201);
+        }
+
         // ve se colaborador tem todos os campos do request tem no modelo
         try {
             $validatedData = $request->validate([
@@ -35,7 +53,6 @@ class CollaboratorController extends Controller
         } catch (ValidationException $e) {
             return response()->json(['message' => 'error', 'error' => $e->errors()], 400);
         }
-
 
         // cria colaborador
         $collaborator = Collaborator::create($validatedData);

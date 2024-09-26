@@ -6,9 +6,9 @@ use App\Models\Collaborator;
 use App\Models\WorkShift;
 use \Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
-use Response;
 
-function calcularIntervalosPorMes($dados) {
+function calcularIntervalosPorMes($dados)
+{
     $intervalosPorMes = [];
 
     // Agrupar os objetos por mês e dia com base no campo created_at
@@ -89,62 +89,57 @@ function calcularIntervalosPorMes($dados) {
     return $resultados;
 }
 
-
-
 class WorkShiftController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-public function index(Request $request)
-{
-    if ($request->has('collaborator_document')) {
-        // Buscar o colaborador pelo documento
-        $collaborator = Collaborator::where('document', $request->collaborator_document)->first();
+    public function index(Request $request)
+    {
+        if ($request->has('collaborator_document')) {
+            // Buscar o colaborador pelo documento
+            $collaborator = Collaborator::where('document', $request->collaborator_document)->first();
 
-        // Se o colaborador existir, buscar os work shifts associados
-        if ($collaborator) {
-            $workShifts = WorkShift::where('collaborator_document', $request->collaborator_document)->get();
+            // Se o colaborador existir, buscar os work shifts associados
+            if ($collaborator) {
+                $workShifts = WorkShift::where('collaborator_document', $request->collaborator_document)->get();
 
-            /**
-             * Pega cada item do workshifts e subtrai o tempo um do outro
-             * Exemplo:
-             * [
-             * "2024-09-19T04:02:55.000000Z",
-             * "2024-09-19T04:26:45.000000Z",
-             * ...
-             * ]
-             *
-             * Retornando 23:50
-             */
-            $totalTrabalhado = calcularIntervalosPorMes($workShifts);
+                /**
+                 * Pega cada item do workshifts e subtrai o tempo um do outro
+                 * Exemplo:
+                 * [
+                 * "2024-09-19T04:02:55.000000Z",
+                 * "2024-09-19T04:26:45.000000Z",
+                 * ...
+                 * ]
+                 *
+                 * Retornando 23:50
+                 */
+                $totalTrabalhado = calcularIntervalosPorMes($workShifts);
 
+                return [
+                    'message' => 'success',
+                    'collaborator' => $collaborator,  // Retorna as informações do colaborador uma vez
+                    'worked_time' => $totalTrabalhado
+                ];
+            }
+
+            // Caso o colaborador não seja encontrado
             return [
-                'message' => 'success',
-                'collaborator' => $collaborator,  // Retorna as informações do colaborador uma vez
-                'worked_time' => $totalTrabalhado
+                'message' => 'error',
+                'error' => 'Collaborator not found'
             ];
         }
 
-        // Caso o colaborador não seja encontrado
+        // Caso não seja fornecido um documento, retornar todos os work shifts com todos os colaboradores
+        // TODO: Paginação de resultados
         return [
-            'message' => 'error',
-            'error' => 'Collaborator not found'
+            'message' => 'success',
+            'workShifts' => WorkShift::all()
         ];
     }
 
-    // Caso não seja fornecido um documento, retornar todos os work shifts com todos os colaboradores
-    // TODO: Paginação de resultados
-    return [
-        'message' => 'success',
-        'workShifts' => WorkShift::all()
-    ];
-}
 
-
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
 
