@@ -26,6 +26,8 @@ class CollaboratorFactory extends Factory
             'role' => null, // Sobrescrito pelo estado
             'hourly_value' => null, // Sobrescrito pelo estado
             'estimated_journey' => null, // Sobrescrito pelo estado
+            'expo_push_token' => null,
+            'milvus_embending_id' => null
         ];
     }
 
