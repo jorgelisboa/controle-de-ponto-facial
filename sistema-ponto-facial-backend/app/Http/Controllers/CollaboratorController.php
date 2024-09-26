@@ -25,12 +25,12 @@ class CollaboratorController extends Controller
         // ve se colaborador tem todos os campos do request tem no modelo
         try {
             $validatedData = $request->validate([
-                'full_name' => 'required',
-                'document' => 'required',
-                'email' => 'required|email',
-                'role' => 'required',
-                'hourly_value' => 'required|numeric',
-                'estimated_journey' => 'required|numeric',
+                'full_name' => 'required|min:3|max:100|nullable',
+                'document' => 'required|min:8|max:32|nullable',
+                'email' => 'required|email|min:10|max:80|nullable',
+                'role' => 'required|min:2|max:32|nullable',
+                'hourly_value' => 'required|numeric|nullable',
+                'estimated_journey' => 'required|numeric|nullable',
             ]);
         } catch (ValidationException $e) {
             return response()->json(['message' => 'error', 'error' => $e->errors()], 400);
