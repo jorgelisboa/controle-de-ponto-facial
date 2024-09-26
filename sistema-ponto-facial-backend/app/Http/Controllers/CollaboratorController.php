@@ -25,10 +25,10 @@ class CollaboratorController extends Controller
         // ve se colaborador tem todos os campos do request tem no modelo
         try {
             $validatedData = $request->validate([
-                'full_name' => 'required',
-                'document' => 'required',
-                'email' => 'required|email',
-                'role' => 'required',
+                'full_name' => 'required|min:3|max:100',
+                'document' => 'required|min:8|max:32',
+                'email' => 'required|email|min:10|max:80',
+                'role' => 'required|min:2|max:32',
                 'hourly_value' => 'required|numeric',
                 'estimated_journey' => 'required|numeric',
             ]);
