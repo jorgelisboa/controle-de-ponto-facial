@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -13,12 +12,14 @@ return new class extends Migration
     {
         Schema::create('work_shifts', function (Blueprint $table) {
             $table->id();
-            $table->string('collaborator_document'); // A coluna que você está tentando definir como chave estrangeira
+            $table->timestamp(column: 'registered_at')->nullable(false); // Quando o ponto foi registrado no celular
+            $table->json('coordinates')->nullable(false); // Coordenadas de onde o ponto foi registrado
+            $table->string('collaborator_document')->nullable(false); // A coluna que você está tentando definir como chave estrangeira
             $table->foreign('collaborator_document')
                 ->references('document')
                 ->on('collaborators')
                 ->onDelete('cascade');
-            $table->timestamps();
+            $table->timestamps(); // Quando foi criado e atualizado no mysql
         });
     }
 
