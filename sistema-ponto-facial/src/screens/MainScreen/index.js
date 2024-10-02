@@ -46,7 +46,7 @@ export default function MainScreen() {
   return (
     <View style={styles.container}>
       <Header userName={'Jonathan'} userImage={'https://avatars.githubusercontent.com/u/113566274?v=4'} />
-      <NotificationsList notifications={exampleNotifications}/>
+      {/* <NotificationsList notifications={exampleNotifications}/> */}
       <HeatMap />
       <BaterPonto />
     </View>
