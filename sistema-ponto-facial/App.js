@@ -1,6 +1,6 @@
 import { NavigationContainer } from "@react-navigation/native";
 import MainScreen from "./src/screens/MainScreen";
-import SimpleList from "./src/screens/Login";
+import Login from "./src/screens/Login";
 import { SafeAreaView, StyleSheet } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { createStackNavigator } from "@react-navigation/stack";
@@ -12,9 +12,9 @@ export default function App() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaView style={styles.safeArea}>
         <NavigationContainer>
-          <Stack.Navigator screenOptions={{ headerShown: false }}>
+          <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="MainScreen">
             <Stack.Screen name="MainScreen" component={MainScreen} />
-            <Stack.Screen name="SimpleList" component={SimpleList} />
+            <Stack.Screen name="Login" component={Login} />
           </Stack.Navigator>
         </NavigationContainer>
       </SafeAreaView>

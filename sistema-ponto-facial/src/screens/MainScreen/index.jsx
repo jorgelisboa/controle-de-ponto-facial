@@ -2,15 +2,15 @@ import { StyleSheet, View } from "react-native";
 import { height, width } from "../../constants/measures";
 import SimpleList from "../../components/SimpleList";
 import { useState } from "react";
-import HeatMap from "../../components/HeatMap";
-import Header from "../../components/Header/Header";
-import { FAB } from "react-native-paper";
-import BaterPonto from "../../components/BaterPonto";
+// import HeatMap from "../../components/HeatMap";
+import Header from "../../components/Header";
 import Notification from "../../components/Notification/Notification";
 import NotificationsList from "../../components/NotificationsList/NotificationsList";
-import PointOption from "../../components/PointOption/PointOption";
 
-export default function MainScreen() {
+import PunchClockFAB from "../../components/PunchClockFAB";
+import HeatMap from "../../components/HeatMap";
+
+export default function MainScreen({navigation}) {
   const [data, setData] = useState([
     {
       id: "1",
@@ -45,10 +45,10 @@ export default function MainScreen() {
 
   return (
     <View style={styles.container}>
-      <Header userName={'Jonathan'} userImage={'https://avatars.githubusercontent.com/u/113566274?v=4'} />
+      <Header userName={'Jonathan'} userImage={'https://avatars.githubusercontent.com/u/113566274?v=4'} navigation={navigation}/>
       {/* <NotificationsList notifications={exampleNotifications}/> */}
       <HeatMap />
-      <BaterPonto />
+      <PunchClockFAB />
     </View>
   );
 }

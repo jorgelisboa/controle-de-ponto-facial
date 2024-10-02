@@ -1,8 +1,8 @@
-import { StyleSheet } from "react-native";
 import { FAB } from "react-native-paper";
 // import { API_URL } from "react-native-dotenv";
+import styles from "./PunchClockFAB.styles";
 
-export default function BaterPonto() {
+export default function PunchClockFAB() {
   const baterPonto = () => {
     console.log(process.env.EXPO_PUBLIC_API_URL + "/shifts");
     fetch(process.env.API_URL + "/shifts", {
@@ -30,12 +30,3 @@ export default function BaterPonto() {
     />
   );
 }
-
-const styles = StyleSheet.create({
-  fab: {
-    position: "absolute",
-    margin: 16,
-    right: 20,
-    bottom: 20,
-  },
-});

@@ -1,6 +1,7 @@
-import { View, StyleSheet, Image, Text, ScrollView  } from 'react-native'
+import { View, Image, Text, ScrollView  } from 'react-native'
 import Notification from '../Notification/Notification'
 import { width } from '../../constants/measures'
+import styles from './NotificationsList.styles'
 
 export default function NotificationsList({ notifications }) {
 
@@ -24,30 +25,3 @@ export default function NotificationsList({ notifications }) {
     </View>
   )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    marginLeft: "5%",
-    paddingRight: "10%",
-  },
-  notificationsList: {
-    paddingTop: 32,
-  },
-  header: {
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: "5%",
-    marginBottom: 8,
-  },
-  sectionTitle: {
-    color: "rgba(34, 34, 34, 1)",
-    fontWeight: "500",
-    fontSize: 18,
-  },
-  option: {
-    fontSize: 14,
-    color: "rgba(34, 34, 34, 0.7)",
-  }
-})
