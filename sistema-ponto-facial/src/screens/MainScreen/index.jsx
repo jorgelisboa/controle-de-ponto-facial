@@ -42,7 +42,6 @@ export default function MainScreen({navigation}) {
     }
   ];
 
-
   return (
     <View style={styles.container}>
       <Header userName={'Jonathan'} userImage={'https://avatars.githubusercontent.com/u/113566274?v=4'} navigation={navigation}/>
