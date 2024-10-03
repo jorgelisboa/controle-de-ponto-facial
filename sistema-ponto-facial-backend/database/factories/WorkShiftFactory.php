@@ -35,10 +35,10 @@ class WorkShiftFactory extends Factory
             'collaborator_document' => $collaborator->document,
             'created_at' => $startTime, // Timestamp de entrada
             'updated_at' => $endTime, // Timestamp de saída
-            'coordinates' => [
-                'latitude' => $this->faker->latitude,
-                'longitude' => $this->faker->longitude,
-            ],
+            'coordinates' => json_encode([
+                'latitude' => (string) $this->faker->latitude,
+                'longitude' => (string) $this->faker->longitude,
+            ]),
             'registered_at' => (clone $endTime)->addHours(8),
         ];
     }
