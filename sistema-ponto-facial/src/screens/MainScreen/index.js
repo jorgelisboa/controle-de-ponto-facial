@@ -1,14 +1,10 @@
 import { StyleSheet, View } from "react-native";
 import { height, width } from "../../constants/measures";
-import SimpleList from "../../components/SimpleList";
 import { useState } from "react";
 import Header from "../../components/Header/Header";
-import { FAB } from "react-native-paper";
 import BaterPonto from "../../components/BaterPonto";
-import Notification from "../../components/Notification/Notification";
 import NotificationsList from "../../components/NotificationsList/NotificationsList";
-import PointOption from "../../components/PointOption/PointOption";
-
+  
 export default function MainScreen() {
   const [data, setData] = useState([
     {
@@ -41,12 +37,22 @@ export default function MainScreen() {
     }
   ];
 
+  async function baterPonto() {
+    // Get current Location
+
+    // Get user document
+
+    // Make api request
+
+    // Deal with response
+  }
 
   return (
     <View style={styles.container}>
       <Header userName={'Jonathan'} userImage={'https://avatars.githubusercontent.com/u/113566274?v=4'} />
       <NotificationsList notifications={exampleNotifications}/>
-      <BaterPonto />
+
+      <BaterPonto action={() => BaterPonto()}/>
     </View>
   );
 }
