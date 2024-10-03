@@ -20,7 +20,7 @@ return new class extends Migration
             $table->decimal('hourly_value' , 8, 2)->nullable(false);
             $table->string('estimated_journey',100)->nullable(false);
             $table->string('expo_push_token',100)->default(NULL)->nullable();
-            $table->string('milvus_embending_id',200)->default(NULL)->nullable();
+            $table->string('milvus_embending_id')->default(NULL)->nullable();
             $table->timestamps();
         });
     }
