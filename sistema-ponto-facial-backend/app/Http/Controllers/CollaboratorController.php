@@ -4,12 +4,23 @@ namespace App\Http\Controllers;
 
 use App\Models\Collaborator;
 use App\Services\ColabCSVImportService;
+use App\Services\FacialService;
 use Http;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use \Illuminate\Validation\ValidationException;
 class CollaboratorController extends Controller
 {
+
+    protected $csvImporter;
+    protected $userFacialService;
+
+    public function __construct(ColabCSVImportService $csvImporter, FacialService $userFacialService)
+    {
+        $this->csvImporter = $csvImporter;
+        $this->userFacialService = $userFacialService;
+    }
+
     /**
      * Display a listing of the collaborators.
      */
@@ -17,14 +28,6 @@ class CollaboratorController extends Controller
     {
         $colabs = Collaborator::all();
         return response()->json(['message' => 'success', 'size' => count($colabs), 'collaborators' => $colabs], 200);
-    }
-
-
-    protected $csvImporter;
-
-    public function __construct(ColabCSVImportService $csvImporter)
-    {
-        $this->csvImporter = $csvImporter;
     }
 
     public function store(Request $request)
@@ -55,15 +58,12 @@ class CollaboratorController extends Controller
             return response()->json(['message' => 'error', 'error' => $e->errors()], 400);
         }
 
-        // Cadastra a facial do usuário na api do flask
-        $response = Http::attach(
-            'image', // O nome do campo do arquivo no request
-            file_get_contents($request->file('image')), // O conteúdo do arquivo
-            $request->file('image')->getClientOriginalName() // O nome do arquivo
-        )->post('98.84.198.179:5000/cadastrar_usuario')->throw(); // throw() ensures synchronous behavior
-
-        if (!$response->successful()) {
-            return response()->json(['message' => 'error', 'error' => 'Não foi possível cadastrar a face do usuário'], 400);
+        // Cadastra a facial do usuário na API Flask usando o Service
+        try {
+            $response = $this->userFacialService->registerFacial($request);
+        } catch (\Exception $e) {
+            // Tratamento para timeout ou qualquer outro erro do Flask
+            return response()->json(['message' => 'timeout', 'error' => 'Não foi possível conectar com o serviço de cadastro de facial. Por favor, tente novamente mais tarde.'], 504);
         }
 
         // Adiciona o campo milvus_embending_id ao validatedData
@@ -99,21 +99,22 @@ class CollaboratorController extends Controller
         $collaborator = Collaborator::where('document', $id)->first();
 
         if ($collaborator) {
-            // ve se colaborador tem todos os campos do request tem no modelo
+            // Valida apenas os campos que estão no request
             try {
                 $validatedData = $request->validate([
-                    'full_name' => 'required',
-                    'document' => 'required',
-                    'email' => 'required|email',
-                    'role' => 'required',
-                    'hourly_value' => 'required|numeric',
-                    'estimated_journey' => 'required|numeric',
+                    'full_name' => 'sometimes|required',
+                    'document' => 'sometimes|required',
+                    'email' => 'sometimes|required|email',
+                    'role' => 'sometimes|required',
+                    'hourly_value' => 'sometimes|required|numeric',
+                    'estimated_journey' => 'sometimes|required|numeric',
                 ]);
             } catch (ValidationException $e) {
                 return response()->json(['message' => 'error', 'error' => $e->errors()], 400);
             }
 
-            $collaborator->update($validatedData);
+            // Atualiza apenas os campos que foram enviados no request
+            $collaborator->update($request->only(array_keys($validatedData)));
 
             return response()->json(['message' => 'success', 'collaborator' => $collaborator], 200);
         }
@@ -124,16 +125,26 @@ class CollaboratorController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Request $request, string $id = null)
     {
-        $collaborator = Collaborator::where('document', $id)->first();
+        // Verifica se há uma lista de IDs no corpo da requisição
+        $ids = $request->input('documents', $id ? [$id] : []);
 
-        if ($collaborator) {
-            // Delete where document field is equal to $id
-            $collaborator->delete();
-            return response()->json(['message' => 'success', 'collaborator' => $collaborator], 200);
+        if (!empty($ids)) {
+            // Encontra os colaboradores cujos documentos correspondem aos IDs fornecidos
+            $collaborators = Collaborator::whereIn('document', $ids)->get();
+
+            if ($collaborators->isNotEmpty()) {
+                // Deleta os colaboradores encontrados
+                Collaborator::whereIn('document', $ids)->delete();
+
+                return response()->json(['message' => 'success', 'deleted_count' => $collaborators->count()], 200);
+            }
+
+            return response()->json(['message' => 'error', 'error' => 'Nenhum colaborador encontrado'], 404);
         }
 
-        return response()->json(['message' => 'error', 'error' => 'Colaborador não encontrado'], 404);
+        return response()->json(['message' => 'error', 'error' => 'Nenhum documento fornecido'], 400);
     }
+
 }

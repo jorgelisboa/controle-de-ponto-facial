@@ -41,6 +41,10 @@ class ColabCSVImportService
                 continue;
             }
 
+            // Cadastra o rosto no sistema de reconhecimento facial (API Flask)
+            // O rosto é um link no csv
+            
+
             // Cria o colaborador se a validação passar e ele não existir
             $collaborators[] = Collaborator::create($record);
         }
