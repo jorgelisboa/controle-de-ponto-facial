@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Sanctum\HasApiTokens;
 
 class Collaborator extends Model
 {
     use HasFactory;
+    use HasApiTokens;
 
     protected $primaryKey = 'document';
     // Fala quais campos podem ser preenchidos
@@ -18,7 +20,9 @@ class Collaborator extends Model
         'document',
         'position',
         'hourly_value',
-        'estimated_journey'
+        'estimated_journey',
+        'milvus_embending_id',
+        'expo_push_token'
     ];
 
     protected $casts = [

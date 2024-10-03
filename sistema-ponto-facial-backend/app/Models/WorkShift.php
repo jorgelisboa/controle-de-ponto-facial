@@ -11,7 +11,15 @@ class WorkShift extends Model
     use HasFactory;
 
     protected $fillable = [
-        'collaborator_document'
+        'collaborator_document',
+        'coordinates',
+        'registered_at',
+    ];
+
+    protected $casts = [
+        'coordinates' => 'array',
+        'registered_at' => 'datetime',
+        'collaborator_document' => 'string',
     ];
 
     // HasMany Relationship
