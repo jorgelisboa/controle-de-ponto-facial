@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Collaborator;
 use App\Models\WorkShift;
+use PDF;
 use \Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
 
@@ -38,23 +39,25 @@ function calcularIntervalosPorMes($dados)
         $totalSegundosMes = 0; // Acumulador para o total de segundos do mês
 
         foreach ($dias as $dia => $timestampsDoDia) {
-            // Ignorar o dia se não tiver um número par de timestamps
-            if (count($timestampsDoDia) % 2 != 0) {
-                continue;
-            }
-
-            $totalSegundos = 0;
-
             // Ordena os timestamps do dia
             sort($timestampsDoDia);
 
-            // Calcula a diferença entre pares de timestamps
+            $totalSegundos = 0;
+            $paresContados = 0;
+
+            // Calcula a diferença entre pares de timestamps, ignorando o último se ímpar
             for ($i = 0; $i < count($timestampsDoDia) - 1; $i += 2) {
                 $inicio = strtotime($timestampsDoDia[$i]);
                 $fim = strtotime($timestampsDoDia[$i + 1]);
 
                 // Calcula a diferença e adiciona ao total de segundos
                 $totalSegundos += ($fim - $inicio);
+                $paresContados++;
+            }
+
+            // Ignorar dias sem pares contados
+            if ($paresContados === 0) {
+                continue;
             }
 
             // Adiciona ao total do mês
@@ -116,6 +119,11 @@ class WorkShiftController extends Controller
                  * Retornando 23:50
                  */
                 $totalTrabalhado = calcularIntervalosPorMes($workShifts);
+
+                if($request->pdf) {
+                    $pdf = PDF::loadView('pdfView', ['workShifts' => $workShifts, 'collaborator' => $collaborator, 'workedTime' => $totalTrabalhado]);
+                    return $pdf->download('workshifts.pdf');
+                }
 
                 return [
                     'message' => 'success',

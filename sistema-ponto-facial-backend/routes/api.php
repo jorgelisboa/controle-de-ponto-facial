@@ -3,6 +3,7 @@
 use App\Http\Controllers\WorkShiftController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PDFController;
 
 //import Controllers
 use App\Http\Controllers\CollaboratorController;
@@ -25,3 +26,5 @@ Route::get('/health', function () {
 Route::apiResource('collaborators', CollaboratorController::class);
 
 Route::apiResource('shifts', WorkShiftController::class);
+
+Route::get('/shifts/pdf', [WorkShiftController::class, 'generatePDF']);

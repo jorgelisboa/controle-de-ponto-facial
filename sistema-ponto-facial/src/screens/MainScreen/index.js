@@ -1,14 +1,10 @@
 import { StyleSheet, View } from "react-native";
 import { height, width } from "../../constants/measures";
-import SimpleList from "../../components/SimpleList";
 import { useState } from "react";
 import HeatMap from "../../components/HeatMap";
 import Header from "../../components/Header/Header";
-import { FAB } from "react-native-paper";
 import BaterPonto from "../../components/BaterPonto";
-import Notification from "../../components/Notification/Notification";
 import NotificationsList from "../../components/NotificationsList/NotificationsList";
-import PointOption from "../../components/PointOption/PointOption";
 
 export default function MainScreen() {
   const [data, setData] = useState([
@@ -41,7 +37,6 @@ export default function MainScreen() {
       description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec.",
     }
   ];
-
 
   return (
     <View style={styles.container}>
