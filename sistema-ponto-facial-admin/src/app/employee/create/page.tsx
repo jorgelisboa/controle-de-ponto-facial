@@ -20,7 +20,7 @@ export default function EmployeeCreate() {
   const onFinishSimple: FormProps<EmployeeCreateType>["onFinish"] = (
     values: EmployeeCreateType
   ) => {
-    fetch(process.env.NEXT_PUBLIC_API_URL + "/api/collaborators/", {
+    fetch(process.env.NEXT_PUBLIC_API_URL + "/collaborators/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
