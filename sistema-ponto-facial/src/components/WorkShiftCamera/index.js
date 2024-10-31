@@ -24,15 +24,37 @@ export default function App() {
     );
   }
 
-  function toggleCameraFacing() {
-    setFacing((current) => (current === "back" ? "front" : "back"));
+  async function baterPonto() {
+    const photo = await cameraRef.current.takePictureAsync();
+
+    // Prepara o arquivo para enviar
+    const formData = new FormData();
+    formData.append("photo", {
+      uri: photo.uri,
+      name: "photo.jpg",
+      type: "image/jpeg",
+    });
+
+    try {
+      const response = await fetch("https://suaapi.com/baterponto", {
+        method: "POST",
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        body: formData,
+      });
+      const result = await response.json();
+      console.log("Foto enviada com sucesso:", result);
+    } catch (error) {
+      console.error("Erro ao enviar foto:", error);
+    }
   }
 
   return (
     <View style={styles.container}>
       <CameraView style={styles.camera} facing={facing}>
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
+          <TouchableOpacity style={styles.button} onPress={baterPonto}>
             <Text style={styles.text}>Flip Camera</Text>
           </TouchableOpacity>
         </View>
@@ -49,7 +71,7 @@ const styles = StyleSheet.create({
   camera: {
     flex: 1,
     width: width,
-    height: height
+    height: height,
   },
   buttonContainer: {
     flex: 1,
