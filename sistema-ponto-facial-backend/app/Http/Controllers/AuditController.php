@@ -7,59 +7,35 @@ use Illuminate\Http\Request;
 
 class AuditController extends Controller
 {
+    public function index()
+    {
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-        //
+    return Audit::all();
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function show($id)
     {
-        //
+        return Audit::findOrFail($id);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $item = Audit::create($request->all());
+        return response()->json($item, 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Audit $audit)
+    public function update(Request $request, $id)
     {
-        //
+        $item = Audit::findOrFail($id);
+        $item->update($request->all());
+        return response()->json($item, 200);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Audit $audit)
+    public function destroy($id)
     {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Audit $audit)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Audit $audit)
-    {
-        //
+        Audit::destroy($id);
+        return response()->json(null, 204);
     }
 }

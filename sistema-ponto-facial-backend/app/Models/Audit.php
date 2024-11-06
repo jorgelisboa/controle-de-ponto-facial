@@ -10,7 +10,8 @@ class Audit extends Model
        'id',
        'created_by',
         'assigned_to',
-        'record_type'
+        'record_type',
+        'description'
     ];
 
 }
