@@ -168,7 +168,7 @@ class WorkShiftController extends Controller
             'image', // O nome do campo do arquivo no request
             file_get_contents($request->file('image')), // O conteúdo do arquivo
             $request->file('image')->getClientOriginalName() // O nome do arquivo
-        )->post('98.84.198.179:5000/verificar_usuario');
+        )->post('98.84.198.179:5000/api/compare');
 
         if ($response->successful()) {
             // cria ponto no mysql
