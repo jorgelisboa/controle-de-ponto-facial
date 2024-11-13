@@ -7,54 +7,90 @@ use App\Models\WorkShift;
 use \Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
 
-function calcularHorasMensais($dados)
+function calcularHorasMensaisRobusta($dados)
 {
     $horasPorMes = [];
 
     foreach ($dados as $objeto) {
-        $timestamp = strtotime($objeto["created_at"]);
-        $mes = date('Y-m', $timestamp);
-
-        // Inicializa o total de segundos trabalhados no mês, se ainda não estiver definido
-        if (!isset($horasPorMes[$mes])) {
-            $horasPorMes[$mes] = 0;
+        if (empty($objeto["created_at"]) || !strtotime($objeto["created_at"])) {
+            error_log("Erro: Registro de ponto inválido ou ausente em um dos objetos.");
+            continue;
         }
 
-        // Adiciona o timestamp à lista do mês atual
-        $horasPorMes[$mes][] = $timestamp;
+        $timestamp = strtotime($objeto["created_at"]);
+        $mes = date('Y-m', $timestamp);
+        $data = date('Y-m-d', $timestamp);
+
+        if (!isset($horasPorMes[$mes])) {
+            $horasPorMes[$mes] = [];
+        }
+        if (!isset($horasPorMes[$mes][$data])) {
+            $horasPorMes[$mes][$data] = [];
+        }
+
+        $horasPorMes[$mes][$data][] = $timestamp;
     }
 
     $resultado = [];
+    $diasComPontosFaltantes = [];
 
-    // Calcula o total de horas para cada mês
-    foreach ($horasPorMes as $mes => $timestamps) {
-        sort($timestamps); // Ordena os timestamps em ordem cronológica
+    foreach ($horasPorMes as $mes => $dias) {
         $totalSegundosMes = 0;
 
-        // Processa os timestamps em pares de entrada e saída
-        for ($i = 0; $i < count($timestamps) - 1; $i += 2) {
-            $entrada = $timestamps[$i];
-            $saida = $timestamps[$i + 1];
+        foreach ($dias as $dia => $timestamps) {
+            $timestamps = array_unique($timestamps); // Remove duplicados
+            sort($timestamps);
 
-            if ($saida > $entrada) { // Garante que saída seja após entrada
-                $totalSegundosMes += ($saida - $entrada);
+            if (count($timestamps) % 2 != 0) {
+                $diasComPontosFaltantes[] = "$dia no mês $mes";
+                array_pop($timestamps);
             }
+
+            $totalSegundosDia = 0;
+            for ($i = 0; $i < count($timestamps); $i += 2) {
+                $entrada = $timestamps[$i];
+                $saida = $timestamps[$i + 1];
+
+                if ($saida <= $entrada) {
+                    error_log("Erro: Saída anterior ou igual à entrada em $dia no mês $mes.");
+                    continue;
+                }
+
+                $horaEntrada = (int) date('H', $entrada);
+                $horaSaida = (int) date('H', $saida);
+
+                if ($horaEntrada < 6 || $horaSaida > 22) {
+                    error_log("Aviso: Registro fora do horário permitido em $dia no mês $mes.");
+                }
+
+                $totalSegundosDia += ($saida - $entrada);
+            }
+
+            if ($totalSegundosDia > 16 * 3600) {
+                error_log("Aviso: Tempo excessivo de trabalho em $dia no mês $mes.");
+                continue;
+            }
+
+            $totalSegundosMes += $totalSegundosDia;
         }
 
-        // Converte o total de segundos do mês para horas, minutos e segundos
         $horas = floor($totalSegundosMes / 3600);
         $minutos = floor(($totalSegundosMes % 3600) / 60);
         $segundos = $totalSegundosMes % 60;
 
-        // Armazena o resultado formatado para o mês
         $resultado[$mes] = [
             'total_worked' => [$horas, $minutos, $segundos],
             'total_seconds' => $totalSegundosMes
         ];
     }
 
+    if (!empty($diasComPontosFaltantes)) {
+        error_log("Dias com registros de ponto faltantes: " . implode(', ', $diasComPontosFaltantes));
+    }
+
     return $resultado;
 }
+
 
 
 class WorkShiftController extends Controller
