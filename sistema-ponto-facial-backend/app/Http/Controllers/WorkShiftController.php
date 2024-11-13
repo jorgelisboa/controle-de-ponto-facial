@@ -7,87 +7,55 @@ use App\Models\WorkShift;
 use \Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
 
-function calcularIntervalosPorMes($dados)
+function calcularHorasMensais($dados)
 {
-    $intervalosPorMes = [];
+    $horasPorMes = [];
 
-    // Agrupar os objetos por mês e dia com base no campo created_at
     foreach ($dados as $objeto) {
-        $timestamp = $objeto["created_at"];
-        $mes = date('Y-m', strtotime($timestamp));
-        $data = date('Y-m-d', strtotime($timestamp));
+        $timestamp = strtotime($objeto["created_at"]);
+        $mes = date('Y-m', $timestamp);
 
-        // Agrupa por mês
-        if (!isset($intervalosPorMes[$mes])) {
-            $intervalosPorMes[$mes] = [];
+        // Inicializa o total de segundos trabalhados no mês, se ainda não estiver definido
+        if (!isset($horasPorMes[$mes])) {
+            $horasPorMes[$mes] = 0;
         }
 
-        // Agrupa por data dentro do mês
-        if (!isset($intervalosPorMes[$mes][$data])) {
-            $intervalosPorMes[$mes][$data] = [];
-        }
-
-        $intervalosPorMes[$mes][$data][] = $timestamp;
+        // Adiciona o timestamp à lista do mês atual
+        $horasPorMes[$mes][] = $timestamp;
     }
 
-    $resultados = [];
+    $resultado = [];
 
-    // Para cada mês, calcular a soma dos intervalos por dia
-    foreach ($intervalosPorMes as $mes => $dias) {
-        $mesTrabalho = [];
-        $totalSegundosMes = 0; // Acumulador para o total de segundos do mês
+    // Calcula o total de horas para cada mês
+    foreach ($horasPorMes as $mes => $timestamps) {
+        sort($timestamps); // Ordena os timestamps em ordem cronológica
+        $totalSegundosMes = 0;
 
-        foreach ($dias as $dia => $timestampsDoDia) {
-            // Ignorar o dia se não tiver um número par de timestamps
-            if (count($timestampsDoDia) % 2 != 0) {
-                continue;
+        // Processa os timestamps em pares de entrada e saída
+        for ($i = 0; $i < count($timestamps) - 1; $i += 2) {
+            $entrada = $timestamps[$i];
+            $saida = $timestamps[$i + 1];
+
+            if ($saida > $entrada) { // Garante que saída seja após entrada
+                $totalSegundosMes += ($saida - $entrada);
             }
-
-            $totalSegundos = 0;
-
-            // Ordena os timestamps do dia
-            sort($timestampsDoDia);
-
-            // Calcula a diferença entre pares de timestamps
-            for ($i = 0; $i < count($timestampsDoDia) - 1; $i += 2) {
-                $inicio = strtotime($timestampsDoDia[$i]);
-                $fim = strtotime($timestampsDoDia[$i + 1]);
-
-                // Calcula a diferença e adiciona ao total de segundos
-                $totalSegundos += ($fim - $inicio);
-            }
-
-            // Adiciona ao total do mês
-            $totalSegundosMes += $totalSegundos;
-
-            // Converte o total de segundos para horas, minutos e segundos
-            $horas = floor($totalSegundos / 3600);
-            $minutos = floor(($totalSegundos % 3600) / 60);
-            $segundos = $totalSegundos % 60;
-
-            // Adiciona os valores para a data atual
-            $mesTrabalho[] = [
-                'date' => $dia,
-                'worked' => [$horas, $minutos, $segundos],
-            ];
         }
 
         // Converte o total de segundos do mês para horas, minutos e segundos
-        $totalHorasMes = floor($totalSegundosMes / 3600);
-        $totalMinutosMes = floor(($totalSegundosMes % 3600) / 60);
-        $totalSegundosMesFinal = $totalSegundosMes % 60;
+        $horas = floor($totalSegundosMes / 3600);
+        $minutos = floor(($totalSegundosMes % 3600) / 60);
+        $segundos = $totalSegundosMes % 60;
 
-        // Só adiciona o mês se houver trabalho calculado
-        if (!empty($mesTrabalho)) {
-            $resultados[$mes] = [
-                'days' => $mesTrabalho,
-                'total_worked' => [$totalHorasMes, $totalMinutosMes, $totalSegundosMesFinal],
-            ];
-        }
+        // Armazena o resultado formatado para o mês
+        $resultado[$mes] = [
+            'total_worked' => [$horas, $minutos, $segundos],
+            'total_seconds' => $totalSegundosMes
+        ];
     }
 
-    return $resultados;
+    return $resultado;
 }
+
 
 class WorkShiftController extends Controller
 {
