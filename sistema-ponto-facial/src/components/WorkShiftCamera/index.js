@@ -1,11 +1,15 @@
 import { CameraView, useCameraPermissions } from "expo-camera";
-import { useState } from "react";
-import { Button, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useState, useRef } from "react";
+import { Button, StyleSheet, Text, View, Alert } from "react-native";
 import { height, width } from "../../constants/measures";
+import * as ImageManipulator from "expo-image-manipulator";
+import { Button as PaperButton } from "react-native-paper";
+import { localhost } from "../../http/api";
 
-export default function App() {
+export default function App({ onClose }) {
   const [facing, setFacing] = useState("front");
   const [permission, requestPermission] = useCameraPermissions();
+  const cameraRef = useRef(null);
 
   if (!permission) {
     // Camera permissions are still loading.
@@ -25,38 +29,54 @@ export default function App() {
   }
 
   async function baterPonto() {
-    const photo = await cameraRef.current.takePictureAsync();
+    if (cameraRef.current) {
+      const photo = await cameraRef.current.takePictureAsync({ skipProcessing: true, mute: true }); // Mute the shutter sound
 
-    // Prepara o arquivo para enviar
-    const formData = new FormData();
-    formData.append("photo", {
-      uri: photo.uri,
-      name: "photo.jpg",
-      type: "image/jpeg",
-    });
+      // Compress the image
+      const compressedPhoto = await ImageManipulator.manipulateAsync(
+        photo.uri,
+        [{ resize: { width: photo.width * 0.5, height: photo.height * 0.5 } }],
+        { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
+      );
 
-    try {
-      const response = await fetch("https://suaapi.com/baterponto", {
-        method: "POST",
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-        body: formData,
+      // Prepare the file to send
+      const formData = new FormData();
+      formData.append("collaborator_document", "19023435515");
+      formData.append("image", {
+        uri: compressedPhoto.uri,
+        name: "photo.jpg",
+        type: "image/jpeg",
       });
-      const result = await response.json();
-      console.log("Foto enviada com sucesso:", result);
-    } catch (error) {
-      console.error("Erro ao enviar foto:", error);
+
+      try {
+        const response = await fetch(`${localhost}/shifts`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          body: formData,
+        });
+        const result = response.json();
+        console.log("Foto enviada com sucesso:", result);
+        onClose(); // Close the camera on successful response
+      } catch (error) {
+        console.error("Erro ao enviar foto:", error);
+        Alert.alert("Erro", "Tente novamente mais tarde"); // Show alert on error
+      }
     }
   }
 
   return (
     <View style={styles.container}>
-      <CameraView style={styles.camera} facing={facing}>
+      <CameraView ref={cameraRef} style={styles.camera} facing={facing}>
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button} onPress={baterPonto}>
-            <Text style={styles.text}>Flip Camera</Text>
-          </TouchableOpacity>
+          <PaperButton
+            style={{ width: width*0.8, marginHorizontal: 'auto' }}
+            mode="contained"
+            onPress={baterPonto}
+          >
+            Bater Ponto
+          </PaperButton>
         </View>
       </CameraView>
     </View>
@@ -74,19 +94,8 @@ const styles = StyleSheet.create({
     height: height,
   },
   buttonContainer: {
-    flex: 1,
-    flexDirection: "row",
+    position: 'absolute',
+    bottom: 32,
     backgroundColor: "transparent",
-    margin: 64,
-  },
-  button: {
-    flex: 1,
-    alignSelf: "flex-end",
-    alignItems: "center",
-  },
-  text: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "white",
   },
 });

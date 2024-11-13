@@ -1,28 +1,16 @@
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, Text } from "react-native";
 import { height, width } from "../../constants/measures";
-import SimpleList from "../../components/SimpleList";
-import { useState } from "react";
-import HeatMap from "../../components/HeatMap";
+import { useState, useEffect } from "react";
+import Heatmap from "../../../Heatmap"; // Add this line
 import Header from "../../components/Header/Header";
-import Notification from "../../components/Notification/Notification";
 import NotificationsList from "../../components/NotificationsList/NotificationsList";
 import WorkShiftCamera from "../../components/WorkShiftCamera";
 import BaterPonto from "../../components/BaterPonto";
+import { getColab, getColabWorkShift } from "../../http/api/colabs"; // Import the getColab and getColabWorkShift functions
 
 export default function MainScreen() {
-  const [data, setData] = useState([
-    {
-      id: "1",
-      title: "Ponto 1",
-      description: "27/09/21 - 10:00 / 27/09/21 - 16:00",
-    },
-    {
-      id: "2",
-      title: "Ponto 2",
-      description: "28/09/21 - 10:30 / 27/09/21 - 16:30",
-    },
-  ]);
-
+  const [user, setUser] = useState(null);
+  const [workShifts, setWorkShifts] = useState([]); // Add state for work shifts
   const [isCameraOpen, setIsCameraOpen] = useState(false);
 
   const exampleNotifications = [
@@ -46,23 +34,65 @@ export default function MainScreen() {
     },
   ];
 
+  useEffect(() => {
+    async function fetchData() {
+      const { collaborators } = await getColab();
+      const randomColab = collaborators[0];
+      console.log(randomColab);
+      setUser(randomColab);
+
+      const worked_time = await getColabWorkShift({
+        collaboratorDocument: randomColab.document,
+        isPdf: false,
+      });
+      console.log(worked_time);
+      setWorkShifts(worked_time);
+    }
+    fetchData();
+  }, []);
+
   function openCamera() {
     setIsCameraOpen(true);
+  }
+
+  function closeCamera() {
+    setIsCameraOpen(false);
   }
 
   return (
     <View style={styles.container}>
       {isCameraOpen ? (
-        <WorkShiftCamera />
+        <WorkShiftCamera onClose={closeCamera} />
       ) : (
         <View style={styles.content}>
           <Header
-            userName={"Jonathan"}
-            userImage={"https://avatars.githubusercontent.com/u/113566274?v=4"}
+            userName={user?.full_name}
+            userImage="https://avatars.githubusercontent.com/u/113566274?v=4"
           />
           <NotificationsList notifications={exampleNotifications} />
-          <HeatMap />
+          <Heatmap />
           <BaterPonto action={openCamera} />
+          <View style={{ width: width, height: height }}>
+            {workShifts &&
+              Object.entries(workShifts).map(([month, data], index) => (
+                <View key={index}>
+                  <Text>{month}</Text>
+                  <Text>Total Worked: {data.total_worked}</Text>
+                  {data.days &&
+                    data.days.map(
+                      (
+                        day,
+                        dayIndex // Add check for data.days
+                      ) => (
+                        <View key={dayIndex}>
+                          <Text>Date: {day.date}</Text>
+                          <Text>Worked: {day.worked.join(", ")}</Text>
+                        </View>
+                      )
+                    )}
+                </View>
+              ))}
+          </View>
         </View>
       )}
     </View>
@@ -88,16 +118,5 @@ const styles = StyleSheet.create({
     margin: 16,
     right: 0,
     bottom: 0,
-  },
-});
-
-const option = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#000000",
-    alignItems: "center",
-    paddingTop: "auto",
-    width: width,
-    height: height,
   },
 });
