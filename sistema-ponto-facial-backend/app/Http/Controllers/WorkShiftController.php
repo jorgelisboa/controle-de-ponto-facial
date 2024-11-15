@@ -6,9 +6,11 @@ use App\Models\Collaborator;
 use App\Models\WorkShift;
 use \Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 function calcularIntervalosPorMes($dados)
 {
+    // Estrutura de dados para armazenar os intervalos por mês
     $intervalosPorMes = [];
 
     // Agrupar os objetos por mês e dia com base no campo created_at
@@ -37,6 +39,9 @@ function calcularIntervalosPorMes($dados)
         $mesTrabalho = [];
         $totalSegundosMes = 0; // Acumulador para o total de segundos do mês
 
+        // Ordena as datas em ordem crescente
+        ksort($dias);
+
         foreach ($dias as $dia => $timestampsDoDia) {
             // Ignorar o dia se não tiver um número par de timestamps
             if (count($timestampsDoDia) % 2 != 0) {
@@ -44,6 +49,7 @@ function calcularIntervalosPorMes($dados)
             }
 
             $totalSegundos = 0;
+            $intervaloSegundos = 0;
 
             // Ordena os timestamps do dia
             sort($timestampsDoDia);
@@ -57,6 +63,11 @@ function calcularIntervalosPorMes($dados)
                 $totalSegundos += ($fim - $inicio);
             }
 
+            // Calcula o intervalo de almoço se houver exatamente 4 timestamps
+            if (count($timestampsDoDia) == 4) {
+                $intervaloSegundos = strtotime($timestampsDoDia[2]) - strtotime($timestampsDoDia[1]);
+            }
+
             // Adiciona ao total do mês
             $totalSegundosMes += $totalSegundos;
 
@@ -65,10 +76,17 @@ function calcularIntervalosPorMes($dados)
             $minutos = floor(($totalSegundos % 3600) / 60);
             $segundos = $totalSegundos % 60;
 
+            // Converte o intervalo de almoço para horas, minutos e segundos
+            $intervaloHoras = floor($intervaloSegundos / 3600);
+            $intervaloMinutos = floor(($intervaloSegundos % 3600) / 60);
+            $intervaloSegundosFinal = $intervaloSegundos % 60;
+
             // Adiciona os valores para a data atual
             $mesTrabalho[] = [
+                'workshifts' => $timestampsDoDia,
                 'date' => $dia,
-                'worked' => [$horas, $minutos, $segundos],
+                'worked_time' => [$horas, $minutos, $segundos],
+                'intervalo' => [$intervaloHoras, $intervaloMinutos, $intervaloSegundosFinal],
             ];
         }
 
@@ -102,43 +120,65 @@ class WorkShiftController extends Controller
 
             // Se o colaborador existir, buscar os work shifts associados
             if ($collaborator) {
-                $workShifts = WorkShift::where('collaborator_document', $request->collaborator_document)->get();
+                $query = WorkShift::where('collaborator_document', $request->collaborator_document);
 
-                /**
-                 * Pega cada item do workshifts e subtrai o tempo um do outro
-                 * Exemplo:
-                 * [
-                 * "2024-09-19T04:02:55.000000Z",
-                 * "2024-09-19T04:26:45.000000Z",
-                 * ...
-                 * ]
-                 *
-                 * Retornando 23:50
-                 */
+                if ($request->has('start') && $request->has('end')) {
+                    $start = date('Y-m-d', strtotime($request->start));
+                    $end = date('Y-m-d', strtotime($request->end));
+                    $query->whereBetween('created_at', [$start, $end]);
+                }
+
+                $workShifts = $query->get();
                 $totalTrabalhado = calcularIntervalosPorMes($workShifts);
+
+                if ($request->has('pdf') && $request->pdf == 'true') {
+                    return $this->generatePdf($collaborator, $totalTrabalhado);
+                }
 
                 return [
                     'message' => 'success',
-                    'collaborator' => $collaborator,  // Retorna as informações do colaborador uma vez
+                    'collaborator' => $collaborator,
                     'worked_time' => $totalTrabalhado
                 ];
             }
 
-            // Caso o colaborador não seja encontrado
             return [
                 'message' => 'error',
                 'error' => 'Collaborator not found'
             ];
         }
 
-        // Caso não seja fornecido um documento, retornar todos os work shifts com todos os colaboradores
-        // TODO: Paginação de resultados
         return [
             'message' => 'success',
             'workShifts' => WorkShift::all()
         ];
     }
 
+    private function generatePdf($collaborator, $totalTrabalhado)
+    {
+        $start_date = request()->start;
+        $end_date = request()->end;
+        $hourly_rate = $collaborator->hourly_value;
+        $expected_hours = $collaborator->estimated_journey;
+        $total_payment = 0;
+
+        foreach ($totalTrabalhado as $month => $data) {
+            $total_hours = $data['total_worked'][0] + ($data['total_worked'][1] / 60);
+            $total_payment += $total_hours * $hourly_rate;
+        }
+
+        $pdf = PDF::loadView('workshift', [
+            'collaborator' => $collaborator,
+            'worked_time' => $totalTrabalhado,
+            'start_date' => $start_date,
+            'end_date' => $end_date,
+            'expected_hours' => $expected_hours,
+            'hourly_rate' => $hourly_rate,
+            'total_payment' => $total_payment
+        ]);
+
+        return $pdf->download('workshift.pdf');
+    }
 
     public function create()
     {
@@ -177,27 +217,28 @@ class WorkShiftController extends Controller
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(string $id)
     {
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
-        //
+
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
-    {
-        //
+    public function destroy(string $id){
+        // Deleta um ponto do usuário
+        $workShift = WorkShift::find($id);
+
+        if ($workShift) {
+            $workShift->delete();
+            return response()->json(['message' => 'success', 'workShift' => $workShift], 200);
+        }
+
+        return response()->json(['message' => 'error', 'error' => 'WorkShift not found'], 404);
     }
 }
