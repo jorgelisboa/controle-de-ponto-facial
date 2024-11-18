@@ -3,25 +3,23 @@
 use App\Http\Controllers\WorkShiftController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UserAuthController;
 
 //import Controllers
 use App\Http\Controllers\CollaboratorController;
-
-// endpoint para criar um token
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
-
-Route::post('/tokens/create', function (Request $request) {
-    $token = $request->user()->createToken($request->token_name);
-
-    return ['token' => $token->plainTextToken];
-});
 
 Route::get('/health', function () {
     return response()->json(['message' => 'Sistema de Ponto Facial está funcionando']);
 });
 
-Route::apiResource('collaborators', CollaboratorController::class);
+// User Authentication
+// Endpoint, Arquivo que vou chamar, Método que vou chamar
+Route::post('register',[UserAuthController::class,'register']);
+Route::post('login',[UserAuthController::class,'login']);
+Route::post('logout',[UserAuthController::class,'logout'])
+  ->middleware('auth:sanctum');
 
+
+// Collaborator and WorkShift
+Route::apiResource('collaborators', CollaboratorController::class);
 Route::apiResource('shifts', WorkShiftController::class);

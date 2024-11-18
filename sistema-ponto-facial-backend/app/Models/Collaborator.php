@@ -18,12 +18,18 @@ class Collaborator extends Model
         'document',
         'position',
         'hourly_value',
-        'estimated_journey'
+        'estimated_journey',
+        'profile_photo_path',
+        'user_id',
+        'expo_push_token',
+        'milvus_embending_id',
+        'profile_photo_path'
     ];
 
     protected $casts = [
         'document' => 'string',
         "hourly_value" => 'float',
-        "estimated_journey" => 'int'
+        "estimated_journey" => 'int',
+        'profile_photo_path' => 'string'
     ];
 }

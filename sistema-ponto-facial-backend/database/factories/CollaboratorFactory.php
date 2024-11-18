@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Collaborator;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -20,14 +21,14 @@ class CollaboratorFactory extends Factory
     public function definition()
     {
         return [
-            'full_name' => $this->faker->name(),
             'document' => $this->faker->unique()->numerify('###########'),
-            'email' => $this->faker->unique()->safeEmail(),
             'role' => null, // Sobrescrito pelo estado
             'hourly_value' => null, // Sobrescrito pelo estado
             'estimated_journey' => null, // Sobrescrito pelo estado
             'expo_push_token' => null,
-            'milvus_embending_id' => null
+            'milvus_embending_id' => null,
+            'profile_photo_path' => null,
+            'user_id' => User::factory(),
         ];
     }
 

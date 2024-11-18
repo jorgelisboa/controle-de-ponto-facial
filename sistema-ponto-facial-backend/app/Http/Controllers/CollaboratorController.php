@@ -7,6 +7,8 @@ use App\Services\ColabCSVImportService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use \Illuminate\Validation\ValidationException;
+use App\Models\User;
+
 class CollaboratorController extends Controller
 {
     /**
@@ -43,22 +45,33 @@ class CollaboratorController extends Controller
         // ve se colaborador tem todos os campos do request tem no modelo
         try {
             $validatedData = $request->validate([
-                'full_name' => 'required|min:3|max:100',
                 'document' => 'required|min:8|max:32',
-                'email' => 'required|email|min:10|max:80',
                 'role' => 'required|min:2|max:32',
                 'hourly_value' => 'required|numeric',
                 'estimated_journey' => 'required|numeric',
+                'profile_photo_path' => 'nullable|image|mimes:jpeg,png,jpg',
             ]);
         } catch (ValidationException $e) {
             return response()->json(['message' => 'error', 'error' => $e->errors()], 400);
+        }
+
+        $validatedData['user_id'] = auth()->id();
+
+        // Handle profile photo upload
+        if ($request->hasFile('collab_photo')) {
+            $path = $request->file('collab_photo')->store('profile_photos', 'public');
+            $validatedData['profile_photo_path'] = $path;
         }
 
         // cria colaborador
         $collaborator = Collaborator::create($validatedData);
 
         // retorna o colaborador criado e uma mensagem de sucesso
-        return response()->json(['message' => 'success', 'collaborator' => $collaborator], 201);
+        return response()->json([
+            'message' => 'success',
+            'collaborator' => $collaborator,
+            'profile_photo_url' => $collaborator->profile_photo_path ? asset('storage/' . $collaborator->profile_photo_path) : null
+        ], 201);
     }
 
     /**
@@ -69,7 +82,21 @@ class CollaboratorController extends Controller
         $collaborator = Collaborator::find($id);
 
         if ($collaborator) {
-            return response()->json(['message' => 'success', 'collaborator' => $collaborator], 200);
+            $user = User::find($collaborator->user_id);
+            return response()->json([
+                'message' => 'success',
+                'collaborator' => [
+                    'document' => $collaborator->document,
+                    'role' => $collaborator->role,
+                    'hourly_value' => $collaborator->hourly_value,
+                    'estimated_journey' => $collaborator->estimated_journey,
+                    'profile_photo_url' => $collaborator->profile_photo_path ? asset('storage/' . $collaborator->profile_photo_path) : null
+                ],
+                'user' => [
+                    'name' => $user->name,
+                    'email' => $user->email
+                ]
+            ], 200);
         }
 
         return response()->json(['message' => 'error', 'error' => 'Colaborador não encontrado'], 404);
@@ -86,20 +113,31 @@ class CollaboratorController extends Controller
             // ve se colaborador tem todos os campos do request tem no modelo
             try {
                 $validatedData = $request->validate([
-                    'full_name' => 'required',
                     'document' => 'required',
-                    'email' => 'required|email',
                     'role' => 'required',
                     'hourly_value' => 'required|numeric',
                     'estimated_journey' => 'required|numeric',
+                    'profile_photo_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                 ]);
             } catch (ValidationException $e) {
                 return response()->json(['message' => 'error', 'error' => $e->errors()], 400);
             }
 
+            $validatedData['user_id'] = auth()->id();
+
+            // Handle profile photo upload
+            if ($request->hasFile('collab_photo') && $request->file('collab_photo')->isValid()) {
+                $path = $request->file('collab_photo')->store('profile_photos', 'public');
+                $validatedData['profile_photo_path'] = $path;
+            }
+
             $collaborator->update($validatedData);
 
-            return response()->json(['message' => 'success', 'collaborator' => $collaborator], 200);
+            return response()->json([
+                'message' => 'success',
+                'collaborator' => $collaborator,
+                'profile_photo_url' => $collaborator->profile_photo_path ? asset('storage/' . $collaborator->profile_photo_path) : null
+            ], 200);
         }
 
         return response()->json(['message' => 'error', 'error' => 'Colaborador não encontrado'], 404);
