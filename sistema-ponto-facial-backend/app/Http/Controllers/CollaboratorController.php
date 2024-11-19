@@ -49,7 +49,7 @@ class CollaboratorController extends Controller
                 'role' => 'required|min:2|max:32',
                 'hourly_value' => 'required|numeric',
                 'estimated_journey' => 'required|numeric',
-                'profile_photo_path' => 'nullable|image|mimes:jpeg,png,jpg',
+                'profile_photo_path' => 'image|mimes:jpeg,png,jpg',
             ]);
         } catch (ValidationException $e) {
             return response()->json(['message' => 'error', 'error' => $e->errors()], 400);
