@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Sanctum\HasApiTokens;
 
 class Collaborator extends Model
 {
     use HasFactory;
+    use HasApiTokens;
 
     protected $primaryKey = 'document';
     // Fala quais campos podem ser preenchidos

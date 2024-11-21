@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Collaborator;
 use App\Services\ColabCSVImportService;
+use App\Services\FacialService;
+use Http;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use \Illuminate\Validation\ValidationException;
@@ -11,6 +13,16 @@ use App\Models\User;
 
 class CollaboratorController extends Controller
 {
+
+    protected $csvImporter;
+    protected $userFacialService;
+
+    public function __construct(ColabCSVImportService $csvImporter, FacialService $userFacialService)
+    {
+        $this->csvImporter = $csvImporter;
+        $this->userFacialService = $userFacialService;
+    }
+
     /**
      * Display a listing of the collaborators.
      */
@@ -18,14 +30,6 @@ class CollaboratorController extends Controller
     {
         $colabs = Collaborator::all();
         return response()->json(['message' => 'success', 'size' => count($colabs), 'collaborators' => $colabs], 200);
-    }
-
-
-    protected $csvImporter;
-
-    public function __construct(ColabCSVImportService $csvImporter)
-    {
-        $this->csvImporter = $csvImporter;
     }
 
     public function store(Request $request)
@@ -42,7 +46,7 @@ class CollaboratorController extends Controller
             return response()->json(['message' => 'success', 'collaborators' => $result['collaborators']], 201);
         }
 
-        // ve se colaborador tem todos os campos do request tem no modelo
+        // Verifica se colaborador tem todos os campos do request no modelo
         try {
             $validatedData = $request->validate([
                 'document' => 'required|min:8|max:32',
@@ -73,6 +77,7 @@ class CollaboratorController extends Controller
             'profile_photo_url' => $collaborator->profile_photo_path ? asset('storage/' . $collaborator->profile_photo_path) : null
         ], 201);
     }
+
 
     /**
      * Display the specified resource.
@@ -110,7 +115,7 @@ class CollaboratorController extends Controller
         $collaborator = Collaborator::where('document', $id)->first();
 
         if ($collaborator) {
-            // ve se colaborador tem todos os campos do request tem no modelo
+            // Valida apenas os campos que estão no request
             try {
                 $validatedData = $request->validate([
                     'document' => 'required',
@@ -146,16 +151,26 @@ class CollaboratorController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Request $request, string $id = null)
     {
-        $collaborator = Collaborator::where('document', $id)->first();
+        // Verifica se há uma lista de IDs no corpo da requisição
+        $ids = $request->input('documents', $id ? [$id] : []);
 
-        if ($collaborator) {
-            // Delete where document field is equal to $id
-            $collaborator->delete();
-            return response()->json(['message' => 'success', 'collaborator' => $collaborator], 200);
+        if (!empty($ids)) {
+            // Encontra os colaboradores cujos documentos correspondem aos IDs fornecidos
+            $collaborators = Collaborator::whereIn('document', $ids)->get();
+
+            if ($collaborators->isNotEmpty()) {
+                // Deleta os colaboradores encontrados
+                Collaborator::whereIn('document', $ids)->delete();
+
+                return response()->json(['message' => 'success', 'deleted_count' => $collaborators->count()], 200);
+            }
+
+            return response()->json(['message' => 'error', 'error' => 'Nenhum colaborador encontrado'], 404);
         }
 
-        return response()->json(['message' => 'error', 'error' => 'Colaborador não encontrado'], 404);
+        return response()->json(['message' => 'error', 'error' => 'Nenhum documento fornecido'], 400);
     }
+
 }

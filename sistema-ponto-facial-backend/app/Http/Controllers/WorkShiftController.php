@@ -1,9 +1,9 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\Collaborator;
 use App\Models\WorkShift;
+use Http;
 use \Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -190,8 +190,10 @@ class WorkShiftController extends Controller
      */
     public function store(Request $request)
     {
-        // Cria um "ponto" do usuário
-
+        /**
+         * collaborator_document (id do collab)
+         * file (is a csv file)
+         */
         try {
             $validatedData = $request->validate([
                 'collaborator_document' => 'required',
@@ -200,13 +202,28 @@ class WorkShiftController extends Controller
             return response()->json(['message' => 'error', 'error' => $e->errors()], 400);
         }
 
-        // se tiver todos os campos, cria o ponto do colaborador
-        // cria ponto
-        $workShift = WorkShift::create($validatedData);
+        // compara foto no milvus, se der certo continua, senão, quebra
+        // pede pro milvus
+        $response = Http::attach(
+            'image', // O nome do campo do arquivo no request
+            file_get_contents($request->file('image')), // O conteúdo do arquivo
+            $request->file('image')->getClientOriginalName() // O nome do arquivo
+        )->post('98.84.198.179:5000/verificar_usuario');
 
-        // retorna o ponto criado e uma mensagem de sucesso
-        return response()->json(['message' => 'success', 'workShift' => $workShift], 201);
+        if ($response->successful()) {
+            // cria ponto no mysql
+            $workShift = WorkShift::create($validatedData);
+            // retorna o ponto criado e uma mensagem de sucesso
+            return response()->json(['message' => 'success', 'workShift' => $workShift], 201);
+        }
 
+        return response()->json([
+            'message' => 'error',
+            'error' => [
+                'message' => 'Não conseguimos encontrar nenhum rosto com uma semelhança o suficiente.',
+                'matched_id' => $response
+            ]
+        ], 201);
     }
 
     /**
