@@ -62,13 +62,16 @@ class CollaboratorController extends Controller
         $validatedData['user_id'] = auth()->id();
 
         // Handle profile photo upload
-        if ($request->hasFile('collab_photo')) {
-            $path = $request->file('collab_photo')->store('profile_photos', 'public');
+        if ($request->hasFile('profile_photo_path')) {
+            $path = $request->file('profile_photo_path')->store('profile_photos', 'public');
             $validatedData['profile_photo_path'] = $path;
         }
 
         // cria colaborador
         $collaborator = Collaborator::create($validatedData);
+
+        // registra a face do colaborador
+        $this->userFacialService->registerFacial($request);
 
         // retorna o colaborador criado e uma mensagem de sucesso
         return response()->json([
@@ -131,12 +134,15 @@ class CollaboratorController extends Controller
             $validatedData['user_id'] = auth()->id();
 
             // Handle profile photo upload
-            if ($request->hasFile('collab_photo') && $request->file('collab_photo')->isValid()) {
-                $path = $request->file('collab_photo')->store('profile_photos', 'public');
+            if ($request->hasFile('profile_photo_path') && $request->file('profile_photo_path')->isValid()) {
+                $path = $request->file('profile_photo_path')->store('profile_photos', 'public');
                 $validatedData['profile_photo_path'] = $path;
             }
 
             $collaborator->update($validatedData);
+
+            // registra a face do colaborador
+            $this->userFacialService->registerFacial($request);
 
             return response()->json([
                 'message' => 'success',

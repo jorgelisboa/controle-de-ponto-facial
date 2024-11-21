@@ -7,6 +7,7 @@ use Http;
 use \Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Services\FacialService;
 
 function calcularIntervalosPorMes($dados)
 {
@@ -109,6 +110,13 @@ function calcularIntervalosPorMes($dados)
 
 class WorkShiftController extends Controller
 {
+    protected $facialService;
+
+    public function __construct(FacialService $facialService)
+    {
+        $this->facialService = $facialService;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -204,11 +212,7 @@ class WorkShiftController extends Controller
 
         // compara foto no milvus, se der certo continua, senão, quebra
         // pede pro milvus
-        $response = Http::attach(
-            'image', // O nome do campo do arquivo no request
-            file_get_contents($request->file('image')), // O conteúdo do arquivo
-            $request->file('image')->getClientOriginalName() // O nome do arquivo
-        )->post('98.84.198.179:5000/verificar_usuario');
+        $response = $this->facialService->registerFacial($request);
 
         if ($response->successful()) {
             // cria ponto no mysql
