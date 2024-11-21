@@ -10,7 +10,8 @@ export default function BaterPonto({action}) {
       accessibilityLabel="Bater ponto"
       style={styles.fab}
       onPress={action}
-      variant="surface"
+      color="white" // Cor do ícone e do texto
+      theme={{ colors: { primary: "black" } }} // Cor de fundo do botão
     />
   );
 }
@@ -21,5 +22,6 @@ const styles = StyleSheet.create({
     margin: 16,
     right: 20,
     bottom: 20,
+    backgroundColor: "black", // Define explicitamente a cor de fundo do botão
   },
 });
