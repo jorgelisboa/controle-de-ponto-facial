@@ -1,6 +1,7 @@
 import { NavigationContainer } from "@react-navigation/native";
 import MainScreen from "./src/screens/MainScreen";
 import SimpleList from "./src/screens/Login";
+
 import RegisterInput from "./src/screens/RegisterCollaborator"; // Assuming RegisterInput is in this path
 import { SafeAreaView, StyleSheet, Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -10,7 +11,7 @@ const Stack = createStackNavigator();
 
 export default function App() {
   const initialRouteName =
-    Platform.OS === "web" ? "RegisterInput" : "MainScreen";
+    Platform.OS === "web" ? "RegisterInput" : "SimpleList";
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

@@ -4,10 +4,10 @@ import { Button } from "react-native-paper";
 import * as DocumentPicker from "expo-document-picker";
 import { width } from "../../constants/measures";
 
-function FileInput({ fileName, setFileName }) {
+function FileInput({ fileName, setFileName, acceptedTypes, buttonText }) {
   async function pickDocument() {
     let result = await DocumentPicker.getDocumentAsync({
-      type: "text/csv", // Ensures only CSV files are allowed
+      type: acceptedTypes, // Use the acceptedTypes prop
     });
     if (result.type === "success") {
       setFileName(result.name);
@@ -26,7 +26,7 @@ function FileInput({ fileName, setFileName }) {
           backgroundColor: fileName ? "#4CAF50" : "#6200ee", // Change color when file is selected
         }}
       >
-        {fileName ? fileName : "Importar colaboradores via CSV"}
+        {fileName ? fileName : buttonText}
       </Button>
     </View>
   );
