@@ -1,5 +1,5 @@
 import { View, StyleSheet, Image, Text, Pressable } from 'react-native'
-export default function RoudedeImageButton({ children, callback }) {
+export default function RoudedeImageButton({ children, onPress }) {
   
   return (
     <Pressable 
@@ -7,7 +7,7 @@ export default function RoudedeImageButton({ children, callback }) {
         styles.button,
         {backgroundColor: pressed ? 'rgba(34, 34, 34, 0.4)' : "#FFF"}
       } 
-      } onPress={() => alert('Button pressed!')}>
+      } onPress={onPress}>
       <View style={styles.container}>
         { children }
       </View>

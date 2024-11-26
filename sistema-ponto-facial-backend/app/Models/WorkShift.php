@@ -22,6 +22,11 @@ class WorkShift extends Model
         'collaborator_document' => 'string',
     ];
 
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+    ];
+
     // HasMany Relationship
     public function collaborators(): BelongsTo
     {

@@ -1,30 +1,74 @@
 import { localhost } from ".";
 
-export async function getColab() {
-  // Return a random item from the array from api
-  return await fetch(`${localhost}/collaborators`)
-    .then((response) => response.json())
-    .catch((error) => error);
+export async function getColab(token) {
+  try {
+    console.log("Fetching collaborator data...");
+    const response = await fetch(`${localhost}/collaborators`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    console.log("Collaborator data fetched successfully");
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching collaborator:", error);
+    throw error;
+  }
 }
 
-export async function getColabWorkShift({ collaboratorDocument, isPdf }) {
-  // Return a random item from the array from api (get with query parameters)
-  const url = new URL(`${localhost}/shifts`);
-  url.searchParams.append('collaborator_document', collaboratorDocument);
-  url.searchParams.append('pdf', isPdf);
+export async function getColabWorkShift({
+  collaboratorDocument,
+  isPdf = false,
+  token,
+}) {
+  if (!collaboratorDocument) {
+    throw new Error("Missing collaboratorDocument parameter");
+  }
+  if (!token) {
+    throw new Error("Missing token parameter");
+  }
 
-  return await fetch(url, {
-    headers: {
-      "Content-Type": "application/json",
-    },
-  })
-    .then((response) => {
-      if (response.ok) {
-        return response.json();
+  try {
+    console.log(
+      `Fetching work shifts for collaborator: ${collaboratorDocument}`
+    );
+    const response = await fetch(
+      `${localhost}/shifts/?collaborator_document=${collaboratorDocument}&isPdf=${isPdf}&start=2020-02-02&end=2029-02-02`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }
-      throw new Error("Erro ao buscar os dados");
-    })
-    .catch((error) => error);
+    );
+    console.log("Work shifts fetched successfully");
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching work shifts:", error);
+    throw error;
+  }
 }
 
-
+export async function fetchUserData(getToken, getUserData) {
+  try {
+    console.log("Fetching user data...");
+    const token = await getToken();
+    const { user, collaborator } = await getUserData();
+    const workShifts = await getColabWorkShift({
+      collaboratorDocument: collaborator.document,
+      isPdf: false,
+      token,
+    });
+    console.log("User data fetched successfully");
+    return {
+      user: {
+        ...user,
+        ...collaborator,
+      },
+      workShifts,
+      workedTime: workShifts.worked_time || [],
+    };
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    throw error;
+  }
+}

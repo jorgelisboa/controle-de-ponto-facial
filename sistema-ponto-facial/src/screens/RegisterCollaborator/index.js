@@ -1,12 +1,13 @@
-import { Button, TextInput } from "react-native-paper";
+import { Button, TextInput, Snackbar } from "react-native-paper";
 import Header from "../../components/Header/Header";
 import { View, StyleSheet } from "react-native";
 import { useState } from "react";
 import FileInput from "../../components/FileInput";
+import {register} from "../../http/api/auth";
 
 export default function RegisterCollaborator() {
   const [collaboratorInfo, setCollaboratorInfo] = useState({
-    full_name: "",
+    name: "", // Changed from name to full_name
     document: "",
     email: "",
     role: "",
@@ -17,6 +18,9 @@ export default function RegisterCollaborator() {
   });
   const [collboratorsCsv, setCollaboratorsCsv] = useState(null);
   const [profilePhoto, setProfilePhoto] = useState(null);
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarError, setSnackbarError] = useState(false);
 
   /**
    *
@@ -30,9 +34,36 @@ export default function RegisterCollaborator() {
     }));
   }
 
-  function registerCollabs() {}
+  async function registerCollabs() {
+    try {
+      const formData = new FormData();
+      for (const key in collaboratorInfo) {
+        formData.append(key, collaboratorInfo[key]);
+      }
+      if (profilePhoto) {
+        formData.append("profile_photo", {
+          uri: profilePhoto.uri,
+          type: profilePhoto.type,
+          name: profilePhoto.name,
+        });
+      }
+      const response = await register(formData);
+      if (response) {
+        setSnackbarMessage("Colaborador cadastrado com sucesso!");
+        setSnackbarError(false);
+      } else {
+        setSnackbarMessage("Erro ao cadastrar colaborador.");
+        setSnackbarError(true);
+      }
+    } catch (error) {
+      setSnackbarMessage("Erro ao cadastrar colaborador.");
+      console.error(error);
+      setSnackbarError(true);
+    } finally {
+      setSnackbarVisible(true);
+    }
+  }
 
-  function handleFileRegister() {}
 
   return (
     <View style={styles.container}>
@@ -59,7 +90,7 @@ export default function RegisterCollaborator() {
         </View>
         <TextInput
           mode="outlined"
-          style={styles.baseInput}
+         style={styles.baseInput}
           label="Nome completo do colaborador"
           accessibilityHint="Insira o nome completo do colaborador"
           keyboardType="default"
@@ -139,6 +170,14 @@ export default function RegisterCollaborator() {
           Criar colaborador
         </Button>
       </View>
+      <Snackbar
+        visible={snackbarVisible}
+        onDismiss={() => setSnackbarVisible(false)}
+        duration={Snackbar.DURATION_SHORT}
+        style={{ backgroundColor: snackbarError ? "red" : "green" }}
+      >
+        {snackbarMessage}
+      </Snackbar>
     </View>
   );
 }

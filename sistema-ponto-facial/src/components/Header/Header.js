@@ -1,12 +1,9 @@
 import { View, StyleSheet, Image, Text } from "react-native";
 import React, { useEffect, useState } from 'react';
-import { height, width } from "../../constants/measures";
-import { Avatar } from "react-native-paper";
 import RoundedImageButton from "../RoundedImageButton/RoundedImageButton";
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import AntDesign from '@expo/vector-icons/AntDesign';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
-export default function Header({ userName, userImage }) {
+export default function Header({ userName, userImage, onSettingsPress }) {
   const [timeGreeting, setTimeGreeting] = useState('');
 
   useEffect(() => {
@@ -31,11 +28,8 @@ export default function Header({ userName, userImage }) {
         </View>
       </View>
       <View style={styles.fastActionBtnContainer}>
-        <RoundedImageButton style={styles.lastChildActionButton}>
-          <MaterialCommunityIcons name="timer-outline" size={24} color="rgba(34, 34, 34, 0.4)" />
-        </RoundedImageButton>
-        <RoundedImageButton style={styles.lastChildActionButton}>
-          <AntDesign name="bells" size={24} color="rgba(34, 34, 34, 0.4)" />
+        <RoundedImageButton style={styles.lastChildActionButton} onPress={onSettingsPress}>
+          <Ionicons name="settings-outline" size={24} color="rgba(34, 34, 34, 0.4)" />
         </RoundedImageButton>
       </View>
     </View>

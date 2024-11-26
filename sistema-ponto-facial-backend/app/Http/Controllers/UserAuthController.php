@@ -18,17 +18,22 @@ class UserAuthController extends Controller
                 'name'=>'required|string',
                 'email'=>'required|string|email|unique:users',
                 'password'=>'required|min:8',
-                'full_name' => 'required|min:3|max:100',
                 'document' => 'required|min:8|max:32',
                 'role' => 'required|min:2|max:32',
-                'hourly_value' => 'required|numeric',
-                'estimated_journey' => 'required|numeric',
+                'hourly_value' => 'required',
+                'estimated_journey' => 'required',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'message' => 'Validation Error',
                 'errors' => $e->errors(),
             ], 422);
+        }
+
+        // Handle profile photo upload
+        $profilePhotoPath = null;
+        if ($request->hasFile('profile_photo_path') && $request->file('profile_photo_path')->isValid()) {
+            $profilePhotoPath = $request->file('profile_photo_path')->store('profile_photos', 'public');
         }
 
         // Cria um novo usuário
@@ -42,6 +47,7 @@ class UserAuthController extends Controller
         Collaborator::create([
             'document' => $request['document'],
             'role' => $request['role'],
+            'profile_photo_path' => $profilePhotoPath,
             'hourly_value' => $request['hourly_value'],
             'estimated_journey' => $request['estimated_journey'],
             'user_id' => $user->id,
@@ -49,6 +55,7 @@ class UserAuthController extends Controller
 
         return response()->json([
             'message' => 'User and Collaborator Created',
+            'profile_photo_url' => $profilePhotoPath ? asset('storage/' . $profilePhotoPath) : null
         ]);
     }
 
@@ -79,9 +86,21 @@ class UserAuthController extends Controller
             ],401);
         }
 
+        $collaborator = Collaborator::where('user_id', $user->id)->first();
         $token = $user->createToken($user->name.'-AuthToken')->plainTextToken;
         return response()->json([
             'access_token' => $token,
+            'user' => [
+                'name' => $user->name,
+                'email' => $user->email,
+            ],
+            'collaborator' => [
+                'document' => $collaborator->document,
+                'role' => $collaborator->role,
+                'hourly_value' => $collaborator->hourly_value,
+                'estimated_journey' => $collaborator->estimated_journey,
+                'profile_photo_url' => $collaborator->profile_photo_path ? asset('storage/' . $collaborator->profile_photo_path) : null,
+            ]
         ]);
     }
 

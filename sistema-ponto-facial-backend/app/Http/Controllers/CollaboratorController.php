@@ -13,7 +13,6 @@ use App\Models\User;
 
 class CollaboratorController extends Controller
 {
-
     protected $csvImporter;
     protected $userFacialService;
 
@@ -28,7 +27,21 @@ class CollaboratorController extends Controller
      */
     public function index(): JsonResponse
     {
-        $colabs = Collaborator::all();
+        $colabs = Collaborator::with('user')->get()->map(function ($collaborator) {
+            $collaborator->profile_photo_url = $collaborator->profile_photo_path ? asset('storage/' . $collaborator->profile_photo_path) : null;
+            return [
+                'document' => $collaborator->document,
+                'role' => $collaborator->role,
+                'hourly_value' => $collaborator->hourly_value,
+                'estimated_journey' => $collaborator->estimated_journey,
+                'profile_photo_url' => $collaborator->profile_photo_url,
+                'user' => [
+                    'name' => $collaborator->user->name,
+                    'email' => $collaborator->user->email
+                ]
+            ];
+        });
+
         return response()->json(['message' => 'success', 'size' => count($colabs), 'collaborators' => $colabs], 200);
     }
 
@@ -62,7 +75,7 @@ class CollaboratorController extends Controller
         $validatedData['user_id'] = auth()->id();
 
         // Handle profile photo upload
-        if ($request->hasFile('profile_photo_path')) {
+        if ($request->hasFile('profile_photo_path') && $request->file('profile_photo_path')->isValid()) {
             $path = $request->file('profile_photo_path')->store('profile_photos', 'public');
             $validatedData['profile_photo_path'] = $path;
         }
@@ -81,16 +94,14 @@ class CollaboratorController extends Controller
         ], 201);
     }
 
-
     /**
      * Display the specified resource.
      */
     public function show(string $id)
     {
-        $collaborator = Collaborator::find($id);
+        $collaborator = Collaborator::with('user')->find($id);
 
         if ($collaborator) {
-            $user = User::find($collaborator->user_id);
             return response()->json([
                 'message' => 'success',
                 'collaborator' => [
@@ -98,11 +109,11 @@ class CollaboratorController extends Controller
                     'role' => $collaborator->role,
                     'hourly_value' => $collaborator->hourly_value,
                     'estimated_journey' => $collaborator->estimated_journey,
-                    'profile_photo_url' => $collaborator->profile_photo_path ? asset('storage/' . $collaborator->profile_photo_path) : null
-                ],
-                'user' => [
-                    'name' => $user->name,
-                    'email' => $user->email
+                    'profile_photo_url' => $collaborator->profile_photo_path ? asset('storage/' . $collaborator->profile_photo_path) : null,
+                    'user' => [
+                        'name' => $collaborator->user->name,
+                        'email' => $collaborator->user->email
+                    ]
                 ]
             ], 200);
         }
@@ -178,5 +189,4 @@ class CollaboratorController extends Controller
 
         return response()->json(['message' => 'error', 'error' => 'Nenhum documento fornecido'], 400);
     }
-
 }
