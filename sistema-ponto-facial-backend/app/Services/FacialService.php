@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 
 class FacialService
 {
-
     public function registerFacial(Request $request)
     {
         try {
@@ -18,7 +17,6 @@ class FacialService
 
             return $flaskResponse->json();
         } catch (\Exception $e) {
-            // Você pode lançar uma exceção personalizada ou simplesmente deixar a exceção passar
             throw new \Exception('Não foi possível cadastrar a face do usuário.');
         }
     }

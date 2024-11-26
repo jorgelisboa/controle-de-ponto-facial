@@ -80,11 +80,18 @@ class CollaboratorController extends Controller
             $validatedData['profile_photo_path'] = $path;
         }
 
-        // cria colaborador
-        $collaborator = Collaborator::create($validatedData);
+        $facialResponse = $this->userFacialService->registerFacial($request);
+        $milvusId = $facialResponse['user_id'];
 
-        // registra a face do colaborador
-        $this->userFacialService->registerFacial($request);
+        $collaborator = Collaborator::create([
+            'document' => $validatedData['document'],
+            'role' => $validatedData['role'],
+            'hourly_value' => $validatedData['hourly_value'],
+            'estimated_journey' => $validatedData['estimated_journey'],
+            'profile_photo_path' => $validatedData['profile_photo_path'],
+            'user_id' => $validatedData['user_id'],
+            'milvus_embedding_id' => $milvusId
+        ]);
 
         // retorna o colaborador criado e uma mensagem de sucesso
         return response()->json([
@@ -153,7 +160,9 @@ class CollaboratorController extends Controller
             $collaborator->update($validatedData);
 
             // registra a face do colaborador
-            $this->userFacialService->registerFacial($request);
+            $facialResponse = $this->userFacialService->registerFacial($request);
+            $collaborator->milvus_embedding_id = $facialResponse['user_id'];
+            $collaborator->save();
 
             return response()->json([
                 'message' => 'success',
