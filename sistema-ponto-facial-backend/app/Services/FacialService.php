@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Services;
+
 use Http;
 use Illuminate\Http\Request;
 
@@ -26,7 +27,8 @@ class FacialService
 
             return $flaskResponse->json();
         } catch (\Exception $e) {
-            throw new \Exception('Não foi possível cadastrar a face do usuário.');
+            \Log::error('Failed to register facial data: ' . $e->getMessage());
+            throw new \Exception('Failed to communicate with Flask.');
         }
     }
 
