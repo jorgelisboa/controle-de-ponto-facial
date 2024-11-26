@@ -212,7 +212,7 @@ class WorkShiftController extends Controller
 
         // compara foto no milvus, se der certo continua, senão, quebra
         // pede pro milvus
-        $response = $this->facialService->registerFacial($request);
+        $response = $this->facialService->compareFacial($request);
 
         if ($response->successful()) {
             // cria ponto no mysql
@@ -240,12 +240,28 @@ class WorkShiftController extends Controller
 
     public function edit(string $id)
     {
-        //
+        // Edita um ponto do usuário
+        $workShift = WorkShift::find($id);
+
+        if ($workShift) {
+            return response()->json(['message' => 'success', 'workShift' => $workShift], 200);
+        }
+
+        return response()->json(['message' => 'error', 'error' => 'WorkShift not found'], 404);
     }
 
     public function update(Request $request, string $id)
     {
+        // Edita um ponto do usuário
+        $workShift = WorkShift::find($id);
 
+        // Se o ponto existir, atualiza os dados
+        if ($workShift) {
+            $workShift->update($request->all());
+            return response()->json(['message' => 'success', 'workShift' => $workShift], 200);
+        }
+
+        return response()->json(['message' => 'error', 'error' => 'WorkShift not found'], 404);
     }
 
     /**
