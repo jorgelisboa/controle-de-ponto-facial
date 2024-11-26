@@ -1,4 +1,4 @@
-import { View, StyleSheet, Image, Text } from "react-native";
+import { View, StyleSheet, Image, Text, Alert } from "react-native";
 import React, { useEffect, useState } from 'react';
 import RoundedImageButton from "../RoundedImageButton/RoundedImageButton";
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -18,6 +18,18 @@ export default function Header({ userName, userImage, onSettingsPress }) {
     }
   })
 
+  const handlePress = (buttonName) => {
+    Alert.alert(
+      "Configurações",
+      `Você clicou em ${buttonName}`,
+      [
+        { text: "OK", onPress: () => console.log(`${buttonName} clicked`) },
+        { text: "Cancelar", style: "cancel" },
+      ],
+      { cancelable: true }
+    );
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.userContainer}>
@@ -28,7 +40,13 @@ export default function Header({ userName, userImage, onSettingsPress }) {
         </View>
       </View>
       <View style={styles.fastActionBtnContainer}>
-        <RoundedImageButton style={styles.lastChildActionButton} onPress={onSettingsPress}>
+        <RoundedImageButton onPress={() => handlePress("Notificações")}>
+          <Ionicons name="notifications-outline" size={24} color="rgba(34, 34, 34, 0.4)" />
+        </RoundedImageButton>
+        <RoundedImageButton onPress={() => handlePress("Mensagens")}>
+          <Ionicons name="mail-outline" size={24} color="rgba(34, 34, 34, 0.4)" />
+        </RoundedImageButton>
+        <RoundedImageButton style={styles.lastChildActionButton} onPress={onSettingsPress || (() => handlePress("Configurações"))}>
           <Ionicons name="settings-outline" size={24} color="rgba(34, 34, 34, 0.4)" />
         </RoundedImageButton>
       </View>
@@ -63,6 +81,7 @@ const styles = StyleSheet.create({
   fastActionBtnContainer: {
     display: "flex",
     flexDirection: "row",
+    gap: 8,
   },
   userNameText: {
     fontSize: 20,

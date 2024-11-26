@@ -225,9 +225,9 @@ class WorkShiftController extends Controller
             'message' => 'error',
             'error' => [
                 'message' => 'Não conseguimos encontrar nenhum rosto com uma semelhança o suficiente.',
-                'matched_id' => $response
+                'matched_id' => $response->json()
             ]
-        ], 201);
+        ], 400); // Change status code to 400 for error
     }
 
     /**

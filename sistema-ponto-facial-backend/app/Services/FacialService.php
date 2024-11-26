@@ -41,7 +41,7 @@ class FacialService
                 $request->file('photo')->getClientOriginalName()
             );
 
-            return $flaskResponse->json();
+            return $flaskResponse; // Return the response object
         } catch (\Exception $e) {
             throw new \Exception('Não foi possível comparar a face do usuário.');
         }
