@@ -17,11 +17,12 @@ class FacialService
                 throw new \Exception('Image not provided.');
             }
 
+            // Ajustar o nome do campo para 'image', como esperado pelo Flask
             $flaskResponse = Http::timeout(30)->attach(
-                'image',
+                'image', // Nome do campo como no Postman
                 file_get_contents($request->file('profile_photo_path')->getRealPath()),
                 $request->file('profile_photo_path')->getClientOriginalName()
-            )->post('http://127.0.0.1:5000/api/face'); // Endereço ajustado para 127.0.0.1 conforme o exemplo
+            )->post('http://98.84.198.179:5000/api/face'); // Altere para o IP/URL correto do Flask
 
             if ($flaskResponse->successful()) {
                 return $flaskResponse->json();
