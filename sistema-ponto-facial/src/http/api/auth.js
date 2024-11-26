@@ -1,4 +1,4 @@
-import { localhost } from ".";
+import { production } from ".";
 
 /**
  *
@@ -29,12 +29,13 @@ export async function register(user) {
 
   try {
     // Configurando a URL e opções da requisição
-    const response = await fetch("http://98.84.198.179/api/register", {
+    const response = await fetch(`${production}/register`, {
       method: "POST",
       body: formData,
       headers: {
         "Accept": "application/json",
         "ngrok-skip-browser-warning": "true",
+        "Content-Type": "multipart/form-data"
       },
     });
 
@@ -53,7 +54,7 @@ export async function register(user) {
 }
 
 export async function login({ email, password }) {
-  const response = await fetch(`${localhost}/login`, {
+  const response = await fetch(`${production}/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -69,7 +70,7 @@ export async function login({ email, password }) {
 }
 
 export function logout(token) {
-  fetch(`${localhost}/logout`, {
+  fetch(`${production}/logout`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
