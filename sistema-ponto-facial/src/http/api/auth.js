@@ -1,4 +1,4 @@
-import { production } from ".";
+import { production, localhost } from ".";
 
 /**
  *
@@ -13,48 +13,42 @@ import { production } from ".";
  * }
  * @returns
  */
-export async function register(user) {
-  // Criação do FormData
-  const formData = new FormData();
-  formData.append("email", user.email);
-  formData.append("password", user.password);
-  formData.append("name", user.name); // Alterado para name como está na interface
-  formData.append("document", user.document);
-  formData.append("role", user.role);
-  formData.append("hourly_value", user.hourly_value);
-  formData.append("estimated_journey", user.estimated_journey);
-
-  // Supondo que o profile_photo_path seja um arquivo
-  formData.append("profile_photo", user.profile_photo_path);
-
+export async function register(formData) {
   try {
-    // Configurando a URL e opções da requisição
-    const response = await fetch(`${production}/register`, {
+    // Log the received FormData
+    console.log('Sending registration data:', formData);
+
+    const response = await fetch(`${localhost}/register`, {
       method: "POST",
       body: formData,
       headers: {
         "Accept": "application/json",
         "ngrok-skip-browser-warning": "true",
-        "Content-Type": "multipart/form-data"
+        // Remove Content-Type header to let browser set it with boundary
       },
     });
 
-    // Tratando a resposta
+    // Log the response status and headers
+    console.log('Response status:', response.status);
+    console.log('Response headers:', response.headers);
+
+    const responseData = await response.json();
+    console.log('Response data:', responseData);
+
     if (response.ok) {
-      return await response.json();
+      return responseData;
     } else {
-      const errorData = await response.json();
-      console.error(`Erro ${response.status}: ${errorData.message}`);
-      return errorData;
+      console.error(`Error ${response.status}:`, responseData);
+      return responseData;
     }
   } catch (error) {
-    console.error("Erro ao fazer a requisição:", error);
+    console.error("Request error:", error);
     return null;
   }
 }
 
 export async function login({ email, password }) {
-  const response = await fetch(`${production}/login`, {
+  const response = await fetch(`${localhost}/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -70,7 +64,7 @@ export async function login({ email, password }) {
 }
 
 export function logout(token) {
-  fetch(`${production}/logout`, {
+  fetch(`${localhost}/logout`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,

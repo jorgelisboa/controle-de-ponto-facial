@@ -6,9 +6,17 @@ use App\Models\User;
 use App\Models\Collaborator;
 use Hash;
 use Illuminate\Http\Request;
+use App\Services\FacialService;
 
 class UserAuthController extends Controller
 {
+    protected $facialService;
+
+    public function __construct(FacialService $facialService)
+    {
+        $this->facialService = $facialService;
+    }
+
     // Cadastro de um novo usuário
     function register(Request $request)
     {
@@ -43,6 +51,13 @@ class UserAuthController extends Controller
             'password' => Hash::make($registerUserData['password']),
         ]);
 
+        // Send profile photo to facial recognition service
+        if ($profilePhotoPath) {
+            $request->merge(['profile_photo_path' => $profilePhotoPath]);
+            $facialResponse = $this->facialService->registerFacial($request);
+            $milvusId = $facialResponse['user_id'];
+        }
+
         // Cria um novo colaborador
         Collaborator::create([
             'document' => $request['document'],
@@ -51,6 +66,7 @@ class UserAuthController extends Controller
             'hourly_value' => $request['hourly_value'],
             'estimated_journey' => $request['estimated_journey'],
             'user_id' => $user->id,
+            'milvus_embedding_id' => $milvusId ?? null
         ]);
 
         return response()->json([

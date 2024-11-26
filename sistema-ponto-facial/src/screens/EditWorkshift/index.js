@@ -4,7 +4,7 @@ import Header from "../../components/Header/Header";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useState, useEffect } from "react";
 
-export default function Audit() {
+export default function EditWorkshift() {
   const [userData, setUserData] = useState({ name: "", photo: "" });
 
   useEffect(() => {
@@ -22,12 +22,12 @@ export default function Audit() {
   }, []);
 
   return (
-    <View style={styles.container}>
+    <>
       <Header userName={userData.name} userImage={userData.photo} />
       <View style={styles.content}>
-        <Text>Audit Screen</Text>
+        <Text>Edit Workshift Screen</Text>
       </View>
-    </View>
+    </>
   );
 }
 

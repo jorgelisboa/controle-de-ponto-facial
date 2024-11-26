@@ -1,19 +1,19 @@
-import React, { useState, useContext, useEffect } from 'react';
-import { View, StyleSheet } from 'react-native';
-import { TextInput, Button, Text } from 'react-native-paper';
-import { UserContext } from '../../context/UserContext';
-import { login } from '../../http/api/auth';
+import React, { useState, useContext, useEffect } from "react";
+import { View, StyleSheet } from "react-native";
+import { TextInput, Button, Text } from "react-native-paper";
+import { UserContext } from "../../context/UserContext";
+import { login } from "../../http/api/auth";
 
-export default function Login({navigation}) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+export default function Login({ navigation }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const { storeToken, storeUserData } = useContext(UserContext);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     if (errorMessage) {
       const timer = setTimeout(() => {
-        setErrorMessage('');
+        setErrorMessage("");
       }, 5000);
       return () => clearTimeout(timer);
     }
@@ -23,18 +23,27 @@ export default function Login({navigation}) {
     try {
       const response = await login({ email, password });
       const data = await response.json();
-      console.log(data);
       if (response.ok && data.access_token) {
         await storeToken(data.access_token);
         await storeUserData(data.user, data.collaborator);
-        console.log("Navigating to Main screen...");
-        navigation.navigate('Main', { user: data.user, collaborator: data.collaborator, token: data.access_token });
+
+        if (data.user.role !== "colab") {
+          navigation.navigate("AdminTabs");
+        } else {
+          navigation.navigate("Main", {
+            user: data.user,
+            collaborator: data.collaborator,
+            token: data.access_token,
+          });
+        }
       } else {
-        setErrorMessage(data.message || 'Credenciais inválidas');
+        setErrorMessage(data.message || "Credenciais inválidas");
       }
     } catch (error) {
-      console.log('Login erro:', error);
-      setErrorMessage('Ocorreu um erro. Por favor, tente novamente mais tarde.');
+      console.log("Login erro:", error);
+      setErrorMessage(
+        "Ocorreu um erro. Por favor, tente novamente mais tarde."
+      );
     }
   };
 
@@ -48,7 +57,7 @@ export default function Login({navigation}) {
         style={styles.input}
         value={email}
         onChangeText={setEmail}
-        theme={{ colors: { primary: 'black', underlineColor: 'transparent' } }}
+        theme={{ colors: { primary: "black", underlineColor: "transparent" } }}
       />
       <TextInput
         label="Password"
@@ -57,7 +66,7 @@ export default function Login({navigation}) {
         style={styles.input}
         value={password}
         onChangeText={setPassword}
-        theme={{ colors: { primary: 'black', underlineColor: 'transparent' } }}
+        theme={{ colors: { primary: "black", underlineColor: "transparent" } }}
       />
       <Button mode="text" onPress={() => {}} style={styles.forgotPassword}>
         Forgot Password?
@@ -72,36 +81,36 @@ export default function Login({navigation}) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     padding: 16,
-    backgroundColor: 'white',
+    backgroundColor: "white",
   },
   title: {
     fontSize: 32,
-    textAlign: 'left',
+    textAlign: "left",
     marginBottom: 32,
-    fontFamily: 'monospace',
+    fontFamily: "monospace",
   },
   input: {
     marginBottom: 16,
   },
   forgotPassword: {
-    alignSelf: 'flex-end',
+    alignSelf: "flex-end",
     marginBottom: 16,
-    color: 'black',
+    color: "black",
   },
   loginButton: {
-    backgroundColor: 'black',
+    backgroundColor: "black",
   },
   error: {
-    color: 'red',
+    color: "red",
     marginBottom: 16,
     fontSize: 16,
-    textAlign: 'center',
-    backgroundColor: '#FFE8E8',
+    textAlign: "center",
+    backgroundColor: "#FFE8E8",
     padding: 10,
     borderRadius: 5,
     borderWidth: 1,
-    borderColor: '#FF0000',
+    borderColor: "#FF0000",
   },
 });

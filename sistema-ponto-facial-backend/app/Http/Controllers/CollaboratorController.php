@@ -80,8 +80,12 @@ class CollaboratorController extends Controller
             $validatedData['profile_photo_path'] = $path;
         }
 
-        $facialResponse = $this->userFacialService->registerFacial($request);
-        $milvusId = $facialResponse['user_id'];
+        // Send profile photo to facial recognition service
+        if (isset($validatedData['profile_photo_path'])) {
+            $request->merge(['profile_photo_path' => $validatedData['profile_photo_path']]);
+            $facialResponse = $this->userFacialService->registerFacial($request);
+            $milvusId = $facialResponse['user_id'];
+        }
 
         $collaborator = Collaborator::create([
             'document' => $validatedData['document'],
@@ -90,7 +94,7 @@ class CollaboratorController extends Controller
             'estimated_journey' => $validatedData['estimated_journey'],
             'profile_photo_path' => $validatedData['profile_photo_path'],
             'user_id' => $validatedData['user_id'],
-            'milvus_embedding_id' => $milvusId
+            'milvus_embedding_id' => $milvusId ?? null
         ]);
 
         // retorna o colaborador criado e uma mensagem de sucesso
@@ -155,6 +159,13 @@ class CollaboratorController extends Controller
             if ($request->hasFile('profile_photo_path') && $request->file('profile_photo_path')->isValid()) {
                 $path = $request->file('profile_photo_path')->store('profile_photos', 'public');
                 $validatedData['profile_photo_path'] = $path;
+            }
+
+            // Send profile photo to facial recognition service
+            if (isset($validatedData['profile_photo_path'])) {
+                $request->merge(['profile_photo_path' => $validatedData['profile_photo_path']]);
+                $facialResponse = $this->userFacialService->registerFacial($request);
+                $collaborator->milvus_embedding_id = $facialResponse['user_id'];
             }
 
             $collaborator->update($validatedData);
