@@ -12,7 +12,6 @@ return new class extends Migration {
     {
         Schema::create('work_shifts', function (Blueprint $table) {
             $table->id();
-            $table->timestamp(column: 'registered_at')->nullable(false); // Quando o ponto foi registrado no celular
             $table->json('coordinates')->nullable(false); // Coordenadas de onde o ponto foi registrado
             $table->string('collaborator_document')->nullable(false); // A coluna que você está tentando definir como chave estrangeira
             $table->foreign('collaborator_document')

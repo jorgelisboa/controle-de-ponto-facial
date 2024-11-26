@@ -13,12 +13,10 @@ class WorkShift extends Model
     protected $fillable = [
         'collaborator_document',
         'coordinates',
-        'registered_at',
     ];
 
     protected $casts = [
         'coordinates' => 'array',
-        'registered_at' => 'datetime',
         'collaborator_document' => 'string',
     ];
 
