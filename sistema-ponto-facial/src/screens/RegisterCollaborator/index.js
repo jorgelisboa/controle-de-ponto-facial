@@ -50,6 +50,13 @@ export default function RegisterCollaborator() {
 
   async function registerCollabs() {
     try {
+      if (!profilePhoto) {
+        setSnackbarMessage("Por favor, selecione uma foto de perfil");
+        setSnackbarError(true);
+        setSnackbarVisible(true);
+        return;
+      }
+
       const formData = new FormData();
       
       // Append all collaborator info except photo
@@ -59,20 +66,24 @@ export default function RegisterCollaborator() {
         }
       });
 
-      // Append the raw image file if it exists
-      if (profilePhoto) {
-        formData.append('profile_photo_path', {
-          uri: profilePhoto.uri,
-          type: profilePhoto.type || 'image/jpeg',
-          name: profilePhoto.fileName || 'photo.jpg'
-        });
-      }
+      // Append the image file with correct structure
+      const photoFile = {
+        uri: Platform.OS === 'android' ? profilePhoto.uri : profilePhoto.uri.replace('file://', ''),
+        type: 'image/jpeg',
+        name: 'profile_photo.jpg'
+      };
+      
+      formData.append('profile_photo_path', photoFile);
+
+      // Log FormData for debugging
+      console.log('FormData contents:', formData);
 
       const response = await register(formData);
 
       if (response.ok) {
         setSnackbarMessage("Colaborador cadastrado com sucesso!");
         setSnackbarError(false);
+        // Reset form
         setCollaboratorInfo({
           name: "",
           document: "",
@@ -85,12 +96,11 @@ export default function RegisterCollaborator() {
         });
         setProfilePhoto(null);
       } else {
-        setSnackbarMessage("Erro ao cadastrar colaborador.");
-        setSnackbarError(true);
+        throw new Error(response.statusText);
       }
     } catch (error) {
       console.error('Registration error:', error);
-      setSnackbarMessage("Erro ao cadastrar colaborador.");
+      setSnackbarMessage("Erro ao cadastrar colaborador: " + error.message);
       setSnackbarError(true);
     } finally {
       setSnackbarVisible(true);

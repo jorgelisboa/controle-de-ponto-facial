@@ -1,13 +1,15 @@
-import { View, StyleSheet, FlatList, TouchableOpacity, Alert } from "react-native";
+import { View, StyleSheet, FlatList, Alert } from "react-native";
 import { Text, Button } from "react-native-paper";
 import Header from "../../components/Header/Header";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useState, useEffect } from "react";
-import { getToken, getColabWorkShift } from "../../services/api";
+import { useState, useEffect, useContext } from "react";
+import { UserContext } from "../../context/UserContext";
+import { getAllCollaborators } from "../../http/api/colabs";
 
 export default function Audit() {
   const [userData, setUserData] = useState({ name: "", photo: "" });
   const [collaborators, setCollaborators] = useState([]);
+  const { getToken } = useContext(UserContext);
 
   useEffect(() => {
     async function loadUserData() {
@@ -23,15 +25,16 @@ export default function Audit() {
     async function loadCollaborators() {
       try {
         const token = await getToken();
-        const collaboratorsData = await getColabWorkShift({ token });
+        const collaboratorsData = await getAllCollaborators(token);
         setCollaborators(collaboratorsData);
       } catch (error) {
         console.error("Erro ao carregar colaboradores:", error);
+        Alert.alert("Erro", "Não foi possível carregar a lista de colaboradores");
       }
     }
     loadUserData();
     loadCollaborators();
-  }, []);
+  }, [getToken]);
 
   const handleAudit = (id) => {
     Alert.alert(

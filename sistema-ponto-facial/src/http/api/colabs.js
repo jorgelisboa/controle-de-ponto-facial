@@ -1,9 +1,9 @@
-import { localhost } from ".";
+import { localhost, production } from ".";
 
 export async function getColab(token) {
   try {
     console.log("Fetching collaborator data...");
-    const response = await fetch(`${localhost}/collaborators`, {
+    const response = await fetch(`${production}/collaborators`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -33,7 +33,7 @@ export async function getColabWorkShift({
       `Fetching work shifts for collaborator: ${collaboratorDocument}`
     );
     const response = await fetch(
-      `${localhost}/shifts/?collaborator_document=${collaboratorDocument}&isPdf=${isPdf}&start=2020-02-02&end=2029-02-02`,
+      `${production}/shifts/?collaborator_document=${collaboratorDocument}&isPdf=${isPdf}&start=2020-02-02&end=2029-02-02`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -69,6 +69,26 @@ export async function fetchUserData(getToken, getUserData) {
     };
   } catch (error) {
     console.error("Error fetching user data:", error);
+    throw error;
+  }
+}
+
+export async function getAllCollaborators(token) {
+  if (!token) {
+    throw new Error("Missing token parameter");
+  }
+
+  try {
+    console.log("Fetching all collaborators...");
+    const response = await fetch(`${production}/collaborators/all`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    console.log("All collaborators fetched successfully");
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching all collaborators:", error);
     throw error;
   }
 }
