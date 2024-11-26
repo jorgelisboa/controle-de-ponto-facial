@@ -21,11 +21,16 @@ class FacialService
                 'image',
                 file_get_contents($request->file('profile_photo_path')->getRealPath()),
                 $request->file('profile_photo_path')->getClientOriginalName()
-            )->post('http://98.84.198.179:5000/api/face')->throw();
+            )->post('http://127.0.0.1:5000/api/face'); // Endereço ajustado para 127.0.0.1 conforme o exemplo
 
-            return $flaskResponse->json();
+            if ($flaskResponse->successful()) {
+                return $flaskResponse->json();
+            } else {
+                throw new \Exception('Flask returned an error: ' . $flaskResponse->body());
+            }
         } catch (\Exception $e) {
-            throw new \Exception('Failed to communicate with the facial service: ' . $e->getMessage());
+            \Log::error('Failed to register facial data: ' . $e->getMessage());
+            throw new \Exception('Failed to communicate with Flask.');
         }
     }
 
@@ -45,9 +50,14 @@ class FacialService
                 $request->file('photo')->getClientOriginalName()
             )->post('http://98.84.198.179:5000/api/compare')->throw();
 
-            return $flaskResponse->json(); // Retorna a resposta JSON do Flask com o user_id correspondente
+            if ($flaskResponse->successful()) {
+                return $flaskResponse->json();
+            } else {
+                throw new \Exception('Flask returned an error: ' . $flaskResponse->body());
+            }
         } catch (\Exception $e) {
-            throw new \Exception('Failed to compare face with Flask service: ' . $e->getMessage());
+            \Log::error('Failed to compare facial data: ' . $e->getMessage());
+            throw new \Exception('Failed to compare face.');
         }
     }
 }

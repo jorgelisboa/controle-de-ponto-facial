@@ -59,14 +59,26 @@ class CollaboratorController extends Controller
             $validatedData['profile_photo_path'] = $path;
         }
 
+        // Registra a face no Flask e obtém o Milvus ID
         $facialResponse = $this->userFacialService->registerFacial($request);
+
+        // Certifique-se de que o Flask retorna o user_id
+        if (!isset($facialResponse['user_id'])) {
+            return response()->json([
+                'message' => 'error',
+                'error' => 'Failed to register face. Flask did not return a valid user_id.'
+            ], 500);
+        }
+
         $milvusId = $facialResponse['user_id'];
 
+        // Cria o colaborador com o Milvus ID
         $collaborator = Collaborator::create(array_merge($validatedData, ['milvus_embedding_id' => $milvusId]));
 
         return response()->json([
             'message' => 'Collaborator Created Successfully',
             'collaborator' => $collaborator,
+            'milvus_id' => $milvusId,
         ], 201);
     }
 
