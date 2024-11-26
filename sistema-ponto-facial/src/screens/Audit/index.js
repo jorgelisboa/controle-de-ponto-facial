@@ -1,8 +1,9 @@
-import { View, StyleSheet, FlatList, TouchableOpacity } from "react-native";
+import { View, StyleSheet, FlatList, TouchableOpacity, Alert } from "react-native";
 import { Text, Button } from "react-native-paper";
 import Header from "../../components/Header/Header";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useState, useEffect } from "react";
+import { getToken, getColabWorkShift } from "../../services/api";
 
 export default function Audit() {
   const [userData, setUserData] = useState({ name: "", photo: "" });
@@ -19,23 +20,29 @@ export default function Audit() {
         });
       }
     }
+    async function loadCollaborators() {
+      try {
+        const token = await getToken();
+        const collaboratorsData = await getColabWorkShift({ token });
+        setCollaborators(collaboratorsData);
+      } catch (error) {
+        console.error("Erro ao carregar colaboradores:", error);
+      }
+    }
     loadUserData();
-    // Simulação de carregamento de colaboradores
-    setCollaborators([
-      { id: "1", name: "Colaborador 1" },
-      { id: "2", name: "Colaborador 2" },
-      // Adicione mais colaboradores conforme necessário
-    ]);
+    loadCollaborators();
   }, []);
 
-  const handleEdit = (id) => {
-    console.log(`Editando colaborador com ID: ${id}`);
-    // Lógica para editar colaborador
-  };
-
-  const handleDelete = (id) => {
-    console.log(`Deletando colaborador com ID: ${id}`);
-    // Lógica para deletar colaborador
+  const handleAudit = (id) => {
+    Alert.alert(
+      "Auditar Colaborador",
+      `Você está prestes a auditar o colaborador com ID: ${id}`,
+      [
+        { text: "Cancelar", style: "cancel" },
+        { text: "OK", onPress: () => console.log(`Auditando colaborador com ID: ${id}`) },
+      ],
+      { cancelable: true }
+    );
   };
 
   return (
@@ -51,17 +58,10 @@ export default function Audit() {
               <View style={styles.buttonContainer}>
                 <Button
                   mode="contained"
-                  onPress={() => handleEdit(item.id)}
+                  onPress={() => handleAudit(item.id)}
                   style={styles.button}
                 >
-                  Editar
-                </Button>
-                <Button
-                  mode="contained"
-                  onPress={() => handleDelete(item.id)}
-                  style={styles.button}
-                >
-                  Deletar
+                  Auditar
                 </Button>
               </View>
             </View>
