@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('collaborators', function (Blueprint $table) {
             $table->string('document',80)->unique()->primary()->nullable(false);
-            $table->string('role',32)->nullable(false);
+            $table->string('role',32)->nullable(false)->default('colab');
             $table->decimal('hourly_value' , 8, 2)->nullable(false);
             $table->string('estimated_journey',100)->nullable(false);
             $table->string('expo_push_token',100)->default(NULL)->nullable();

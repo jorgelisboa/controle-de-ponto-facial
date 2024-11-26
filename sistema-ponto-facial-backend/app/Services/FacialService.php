@@ -11,7 +11,7 @@ class FacialService
     {
         try {
             $flaskResponse = Http::attach(
-                'profile_photo_path', // O nome do campo do arquivo no request
+                'image', // O nome do campo do arquivo no request
                 file_get_contents($request->file('profile_photo_path')), // O conteúdo do arquivo
                 $request->file('profile_photo_path')->getClientOriginalName() // O nome do arquivo
             )->post('http://98.84.198.179:5000/cadastrar_usuario')->throw();
