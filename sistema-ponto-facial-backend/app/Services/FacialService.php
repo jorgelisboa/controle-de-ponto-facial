@@ -15,7 +15,7 @@ class FacialService
             }
     
             // Envia a requisição ao Flask
-            $flaskResponse = Http::attach(
+            $flaskResponse = Http::timeout(30)->attach(
                 'image', // Nome do campo esperado pelo Flask
                 file_get_contents($request->file('profile_photo_path')->getRealPath()), // Lê o conteúdo do arquivo
                 $request->file('profile_photo_path')->getClientOriginalName() // Nome do arquivo
