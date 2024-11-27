@@ -2,15 +2,25 @@ import React from "react";
 import { View } from "react-native";
 import { Button } from "react-native-paper";
 import * as DocumentPicker from "expo-document-picker";
-import { width } from "../../constants/measures";
+import * as ImagePicker from "expo-image-picker";
 
 function FileInput({ fileName, setFileName, acceptedTypes, buttonText }) {
   async function pickDocument() {
     let result = await DocumentPicker.getDocumentAsync({
-      type: acceptedTypes, // Use the acceptedTypes prop
+      type: acceptedTypes,
     });
     if (result.type === "success") {
       setFileName(result.name);
+    } else if (acceptedTypes.includes("image/*")) {
+      let imageResult = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaType[acceptedTypes.split("/")[0]],
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+      });
+      if (!imageResult.cancelled) {
+        setFileName(imageResult.uri.split('/').pop());
+      }
     }
   }
 

@@ -19,6 +19,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function MainScreen({ navigation, route }) {
   const [user, setUser] = useState(route.params?.user || {});
+  const [collaborator, setCollaborator] = useState(route.params?.collaborator || {});
   const [workShifts, setWorkShifts] = useState([]);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -38,6 +39,7 @@ export default function MainScreen({ navigation, route }) {
         console.log("Fetched work shifts:", workShifts);
         console.log("Fetched worked time:", workedTime);
         setUser(user);
+        setCollaborator(collaborator);
         setWorkShifts(workShifts);
         setWorkedTime(workedTime);
         console.log("Data fetched successfully for MainScreen");

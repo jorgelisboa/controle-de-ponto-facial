@@ -27,15 +27,11 @@ export default function Login({ navigation }) {
         await storeToken(data.access_token);
         await storeUserData(data.user, data.collaborator);
 
-        if (data.user.role !== "admin") {
-          navigation.navigate("AdminTabs");
-        } else {
-          navigation.navigate("Main", {
-            user: data.user,
-            collaborator: data.collaborator,
-            token: data.access_token,
-          });
-        }
+        navigation.navigate("Main", {
+          user: data.user,
+          collaborator: data.collaborator,
+          token: data.access_token,
+        });
       } else {
         setErrorMessage(data.message || "Credenciais inválidas");
       }
