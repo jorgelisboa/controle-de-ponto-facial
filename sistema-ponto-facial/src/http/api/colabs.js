@@ -80,7 +80,7 @@ export async function getAllCollaborators(token) {
 
   try {
     console.log("Fetching all collaborators...");
-    const response = await fetch(`${production}/collaborators/all`, {
+    const response = await fetch(`${production}/collaborators`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
