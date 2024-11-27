@@ -1,144 +1,109 @@
-import React from 'react';
-import { View, Dimensions, Text, ScrollView, StyleSheet } from 'react-native';
-import { LineChart, BarChart, PieChart } from 'react-native-chart-kit';
+import React, { useState, useEffect, useContext } from 'react';
+import { View, Text, Dimensions, StyleSheet } from 'react-native';
+import { BarChart } from 'react-native-chart-kit';
+import { UserContext } from '../../context/UserContext';
+import { getColab } from '../../http/api/colabs';
 
 export default function Dashboard() {
-    const screenWidth = Dimensions.get("window").width;
+  const [data, setData] = useState({ labels: [], datasets: [{ data: [] }] });
+  const { getToken } = useContext(UserContext);
 
-    // Dados para o gráfico de linha
-    const lineData = {
-        labels: ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho"],
-        datasets: [
-            {
-                data: [20, 45, 28, 80, 99, 43],
-                color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`, // Cor da linha em branco
-                strokeWidth: 2 // Largura da linha
+  useEffect(() => {
+    async function fetchCollaborators() {
+      try {
+        const token = await getToken();
+        const response = await getColab(token);
+
+        if (response && response.message === "success") {
+          const roleData = {};
+
+          response.collaborators.forEach(collaborator => {
+            const { role, hourly_value, estimated_journey } = collaborator;
+            const value = hourly_value * estimated_journey;
+
+            if (roleData[role]) {
+              roleData[role] += value;
+            } else {
+              roleData[role] = value;
             }
-        ],
-        legend: ["Vendas Mensais"] // Legenda do gráfico
-    };
+          });
 
-    // Dados para o gráfico de barras
-    const barData = {
-        labels: ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho"],
-        datasets: [
-            {
-                data: [20, 45, 28, 80, 99, 43] // Dados das barras
-            }
-        ]
-    };
+          const labels = Object.keys(roleData);
+          const values = Object.values(roleData);
 
-    // Dados para o gráfico de pizza
-    const pieData = [
-        {
-            name: "Grupo A",
-            population: 21500000,
-            color: "rgba(255, 255, 255, 1)", // Cor em branco
-            legendFontColor: "#FFFFFF", // Cor da legenda em branco
-            legendFontSize: 15
-        },
-        {
-            name: "Grupo B",
-            population: 2800000,
-            color: "#7F7F7F", // Cor cinza
-            legendFontColor: "#FFFFFF", // Cor da legenda em branco
-            legendFontSize: 15
-        },
-        {
-            name: "Grupo C",
-            population: 527612,
-            color: "#D3D3D3", // Cor cinza claro
-            legendFontColor: "#FFFFFF", // Cor da legenda em branco
-            legendFontSize: 15
+          setData({
+            labels,
+            datasets: [{ data: values }],
+          });
         }
-    ];
+      } catch (error) {
+        console.error("Erro ao buscar colaboradores:", error);
+      }
+    }
 
-    return (
-        <ScrollView contentContainerStyle={styles.scrollView}> {/* Usando contentContainerStyle para permitir rolagem */}
-            <View style={styles.container}>
-                <Text style={styles.title}>Gráfico de Linha</Text>
-                <LineChart
-                    data={lineData}
-                    width={screenWidth}
-                    height={220}
-                    chartConfig={{
-                        backgroundColor: "#000000", // Fundo preto
-                        backgroundGradientFrom: "#000000",
-                        backgroundGradientTo: "#000000",
-                        decimalPlaces: 2,
-                        color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`, // Cor do texto em branco
-                        labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`, // Cor do rótulo em branco
-                        style: {
-                            borderRadius: 16
-                        }
-                    }}
-                    bezier
-                    style={styles.chart}
-                />
+    fetchCollaborators();
+  }, [getToken]);
 
-                <Text style={styles.title}>Gráfico de Barras</Text>
-                <BarChart
-                    data={barData}
-                    width={screenWidth}
-                    height={220}
-                    chartConfig={{
-                        backgroundColor: "#000000", // Fundo preto
-                        backgroundGradientFrom: "#000000",
-                        backgroundGradientTo: "#000000",
-                        decimalPlaces: 2,
-                        color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`, // Cor do texto em branco
-                        labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`, // Cor do rótulo em branco
-                        style: {
-                            borderRadius: 16
-                        }
-                    }}
-                    style={styles.chart}
-                />
+  const screenWidth = Dimensions.get("window").width;
 
-                <Text style={styles.title}>Gráfico de Pizza</Text>
-                <PieChart
-                    data={pieData}
-                    width={screenWidth}
-                    height={220}
-                    chartConfig={{
-                        backgroundColor: "#000000", // Fundo preto
-                        backgroundGradientFrom: "#000000",
-                        backgroundGradientTo: "#000000",
-                        color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`, // Cor do texto em branco
-                        labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`, // Cor do rótulo em branco
-                        style: {
-                            borderRadius: 16
-                        }
-                    }}
-                    accessor={"population"}
-                    backgroundColor={"transparent"}
-                    paddingLeft={"15"}
-                    center={[10, 50]}
-                    absolute
-                />
-            </View>
-        </ScrollView>
-    );
+  const chartConfig = {
+    backgroundGradientFrom: "#ffffff",
+    backgroundGradientTo: "#ffffff",
+    color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+    barPercentage: 0.5,
+    decimalPlaces: 0,
+  };
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.chartTitle}>Gastos esperados por setor/mês</Text>
+      <View style={styles.chartContainer}>
+        <Text style={styles.yAxisLabel}>VALOR</Text>
+        <BarChart
+          data={data}
+          width={screenWidth - 60}
+          height={220}
+          chartConfig={chartConfig}
+          verticalLabelRotation={30}
+          style={styles.chart}
+        />
+      </View>
+    </View>
+  );
 }
 
-// Estilos para o componente
 const styles = StyleSheet.create({
-    scrollView: {
-        flexGrow: 1, // Permite que o ScrollView cresça
-        padding: 16, // Adiciona um pouco de espaço ao redor
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: '#f5f5f5',
+    alignItems: 'center',
+  },
+  chartTitle: {
+    fontSize: 18,
+    textAlign: 'center',
+    marginVertical: 10,
+    fontWeight: 'bold',
+  },
+  chartContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  yAxisLabel: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    marginRight: 10,
+    transform: [{ rotate: '270deg' }],
+  },
+  chart: {
+    borderRadius: 10,
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
     },
-    container: {
-        paddingBottom: 16, // Adiciona espaço na parte inferior
-        backgroundColor: '#000000', // Fundo preto
-    },
-    title: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        marginBottom: 10,
-        color: '#FFFFFF', // Cor do título em branco
-    },
-    chart: {
-        marginVertical: 8,
-        borderRadius: 16,
-    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+  },
 });
