@@ -9,7 +9,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Audit from "../screens/Audit";
 import EditWorkshift from "../screens/EditWorkshift";
 import RegisterCollaborator from "../screens/RegisterCollaborator";
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -35,7 +35,11 @@ function AdminNavigator() {
         options={{
           tabBarLabel: "Cadastrar",
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="account-plus" size={size} color={color} />
+            <MaterialCommunityIcons
+              name="account-plus"
+              size={size}
+              color={color}
+            />
           ),
         }}
       />
@@ -45,7 +49,11 @@ function AdminNavigator() {
         options={{
           tabBarLabel: "Auditoria",
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="file-document-edit" size={size} color={color} />
+            <MaterialCommunityIcons
+              name="file-document-edit"
+              size={size}
+              color={color}
+            />
           ),
         }}
       />
@@ -55,7 +63,11 @@ function AdminNavigator() {
         options={{
           tabBarLabel: "Editar Turno",
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="clock-edit" size={size} color={color} />
+            <MaterialCommunityIcons
+              name="clock-edit"
+              size={size}
+              color={color}
+            />
           ),
         }}
       />
@@ -69,9 +81,9 @@ function RootNavigator({ token, userData }) {
       {!token ? (
         <Stack.Screen name="Login" component={Login} />
       ) : (
-        <Stack.Screen 
-          name="Main" 
-          component={userData?.role !== "colab" ? AdminNavigator : MainScreen} 
+        <Stack.Screen
+          name="Main"
+          component={userData?.role === "admin" ? AdminNavigator : MainScreen}
         />
       )}
     </Stack.Navigator>
