@@ -24,4 +24,4 @@ Route::post('logout',[UserAuthController::class,'logout'])
 // Collaborator and WorkShift
 Route::apiResource('collaborators', CollaboratorController::class)->middleware('auth:sanctum');
 Route::apiResource('shifts', WorkShiftController::class)->middleware('auth:sanctum');
-Route::apiResource('audit', AuditController::class)->middleware('auth:sanctum');
+Route::apiResource('audits', AuditController::class)->middleware('auth:sanctum');
