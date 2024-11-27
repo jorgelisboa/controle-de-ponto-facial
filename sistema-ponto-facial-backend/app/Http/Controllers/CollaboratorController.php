@@ -150,9 +150,10 @@ class CollaboratorController extends Controller
             $collaborator->milvus_embedding_id = $facialResponse['user_id'];
             $collaborator->save();
 
-        return response()->json([
-            'message' => 'success',
-            'collaborator' => $collaborator,
-        ], 200);
+            return response()->json([
+                'message' => 'success',
+                'collaborator' => $collaborator,
+            ], 200);
+        }
     }
 }
