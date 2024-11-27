@@ -92,3 +92,31 @@ export async function getAllCollaborators(token) {
     throw error;
   }
 }
+
+export async function createAudit({ createdBy, assignedTo, recordType, description, token }) {
+  if (!token) {
+    throw new Error("Missing token parameter");
+  }
+
+  try {
+    console.log("Creating audit...");
+    const response = await fetch(`${production}/audits`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        created_by: createdBy,
+        assigned_to: assignedTo,
+        record_type: recordType,
+        description: description,
+      }),
+    });
+    console.log("Audit created successfully");
+    return await response.json();
+  } catch (error) {
+    console.error("Error creating audit:", error);
+    throw error;
+  }
+}

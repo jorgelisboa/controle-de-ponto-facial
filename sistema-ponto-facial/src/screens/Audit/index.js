@@ -4,15 +4,16 @@ import { Text, Button } from "react-native-paper";
 import Header from "../../components/Header/Header";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { UserContext } from "../../context/UserContext";
-import { getColab } from "../../http/api/colabs";
+import { getColab, createAudit } from "../../http/api/colabs";
 
 export default function Audit() {
   const [userData, setUserData] = useState({ name: "", photo: "" });
   const [collaborators, setCollaborators] = useState([]);
-  const { getToken } = useContext(UserContext);
+  const { getToken, getUserData } = useContext(UserContext);
   const [modalVisible, setModalVisible] = useState(false);
   const [subtitle, setSubtitle] = useState("");
   const [description, setDescription] = useState("");
+  const [selectedCollaboratorDocument, setSelectedCollaboratorDocument] = useState("");
 
   useEffect(() => {
     async function loadUserData() {
@@ -50,10 +51,37 @@ export default function Audit() {
     setModalVisible(true);
   };
 
-  const handleSubmit = () => {
-    console.log(`Subtítulo: ${subtitle}, Descrição: ${description}`);
-    setModalVisible(false);
-    // Aqui você pode adicionar lógica para enviar os dados para o servidor ou processá-los conforme necessário
+  const handleSubmit = async () => {
+    try {
+      const token = await getToken();
+      const { collaborator } = await getUserData();
+
+      const response = await fetch('http://98.84.198.179/api/audits', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          created_by: collaborator.document,
+          assigned_to: selectedCollaboratorDocument || collaborator.document,
+          record_type: subtitle || "Default Record Type",
+          description: description || "Default Description",
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error('Erro ao criar auditoria:', errorData);
+        return;
+      }
+
+      const result = await response.json();
+      console.log('Audit Created Successfully:', result);
+      setModalVisible(false);
+    } catch (error) {
+      console.error('Erro na requisição:', error);
+    }
   };
 
   return (
