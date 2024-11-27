@@ -84,9 +84,58 @@ export default function Audit() {
     }
   };
 
+  const handleSettings = (option) => {
+    if (option === "logout") {
+      handleLogout();
+    } else if (option === "extractReport") {
+      handleExtractReport();
+    }
+  };
+
+  const handleLogout = async () => {
+    const token = await getToken();
+    logout(token);
+    await AsyncStorage.clear();
+    navigation.navigate("Login");
+  };
+
+  const handleExtractReport = async () => {
+    try {
+      const token = await getToken();
+      const { collaborator } = await getUserData();
+      await getColabWorkShift({
+        collaboratorDocument: collaborator.document,
+        isPdf: true,
+        token,
+      });
+      Alert.alert("Relatório PDF extraído com sucesso!");
+    } catch (error) {
+      console.error("Error extracting PDF report:", error);
+      Alert.alert("Erro ao extrair relatório PDF.");
+    }
+  };
+
   return (
     <View style={styles.container}>
-      <Header userName={userData.name} userImage={userData.photo} />
+      <Header
+        userName={userData.name}
+        userImage={userData.photo}
+        onSettingsPress={() =>
+          Alert.alert(
+            "Configurações",
+            "Escolha uma opção",
+            [
+              { text: "Sair", onPress: () => handleSettings("logout") },
+              {
+                text: "Extrair Relatório PDF",
+                onPress: () => handleSettings("extractReport"),
+              },
+              { text: "Cancelar", style: "cancel" },
+            ],
+            { cancelable: true }
+          )
+        }
+      />
       <View style={styles.content}>
         <FlatList
           data={collaborators}

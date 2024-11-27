@@ -40,12 +40,6 @@ export default function Header({ userName, userImage, onSettingsPress }) {
         </View>
       </View>
       <View style={styles.fastActionBtnContainer}>
-        <RoundedImageButton onPress={() => handlePress("Notificações")}>
-          <Ionicons name="notifications-outline" size={24} color="rgba(34, 34, 34, 0.4)" />
-        </RoundedImageButton>
-        <RoundedImageButton onPress={() => handlePress("Mensagens")}>
-          <Ionicons name="mail-outline" size={24} color="rgba(34, 34, 34, 0.4)" />
-        </RoundedImageButton>
         <RoundedImageButton style={styles.lastChildActionButton} onPress={onSettingsPress || (() => handlePress("Configurações"))}>
           <Ionicons name="settings-outline" size={24} color="rgba(34, 34, 34, 0.4)" />
         </RoundedImageButton>

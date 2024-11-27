@@ -5,6 +5,7 @@ export const UserContext = createContext();
 
 export const UserContextProvider = ({ children }) => {
   const [token, setToken] = useState(null);
+  const [collaborator, setCollaborator] = useState(null);
 
   const storeToken = async (newToken) => {
     try {
@@ -46,8 +47,12 @@ export const UserContextProvider = ({ children }) => {
     try {
       console.log("Storing user data and collaborator data...");
       await AsyncStorage.setItem("user_data", JSON.stringify(user));
-      await AsyncStorage.setItem("collaborator_data", JSON.stringify(collaborator));
+      await AsyncStorage.setItem(
+        "collaborator_data",
+        JSON.stringify(collaborator)
+      );
       console.log("User data and collaborator data stored successfully");
+      setCollaborator(collaborator);
 
       // Log current storage state after operation
       const keys = await AsyncStorage.getAllKeys();
@@ -73,6 +78,7 @@ export const UserContextProvider = ({ children }) => {
       console.log("collaborator_data:");
       console.log(JSON.stringify(JSON.parse(collaborator), null, 2));
       console.log("===========================");
+      setCollaborator(JSON.parse(collaborator));
       return { user: JSON.parse(user), collaborator: JSON.parse(collaborator) };
     } catch (error) {
       console.error("Error getting user data:", error);
@@ -91,6 +97,7 @@ export const UserContextProvider = ({ children }) => {
         logout,
         storeUserData,
         getUserData,
+        collaborator,
       }}
     >
       {children}

@@ -1,15 +1,17 @@
 import { CameraView, useCameraPermissions } from "expo-camera";
-import { useState, useRef } from "react";
+import { useState, useRef, useContext } from "react";
 import { Button, StyleSheet, Text, View, Alert } from "react-native";
 import { height, width } from "../../constants/measures";
 import * as ImageManipulator from "expo-image-manipulator";
 import { Button as PaperButton } from "react-native-paper";
 import { localhost } from "../../http/api";
+import { UserContext } from "../../context/UserContext";
 
 export default function App({ onClose }) {
   const [facing, setFacing] = useState("front");
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = useRef(null);
+  const { collaborator } = useContext(UserContext);
 
   if (!permission) {
     // Camera permissions are still loading.
@@ -41,7 +43,7 @@ export default function App({ onClose }) {
 
       // Prepare the file to send
       const formData = new FormData();
-      formData.append("collaborator_document", "19023435515");
+      formData.append("collaborator_document", collaborator.document);
       formData.append("image", {
         uri: compressedPhoto.uri,
         name: "photo.jpg",
