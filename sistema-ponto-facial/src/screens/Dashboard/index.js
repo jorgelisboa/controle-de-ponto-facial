@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, Dimensions, StyleSheet } from 'react-native';
+import { View, Text, Dimensions, StyleSheet, TouchableOpacity } from 'react-native';
 import { BarChart } from 'react-native-chart-kit';
 import { UserContext } from '../../context/UserContext';
 import { getColab } from '../../http/api/colabs';
 
-export default function Dashboard() {
+export default function Dashboard({ navigation }) {
   const [data, setData] = useState({ labels: [], datasets: [{ data: [] }] });
-  const { getToken } = useContext(UserContext);
+  const { getToken, logout } = useContext(UserContext);
 
   useEffect(() => {
     async function fetchCollaborators() {
@@ -44,6 +44,11 @@ export default function Dashboard() {
     fetchCollaborators();
   }, [getToken]);
 
+  const handleLogout = async () => {
+    await logout();
+    navigation.navigate('Login');
+  };
+
   const screenWidth = Dimensions.get("window").width;
 
   const chartConfig = {
@@ -56,7 +61,12 @@ export default function Dashboard() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.chartTitle}>Gastos esperados por setor/mês</Text>
+      <View style={styles.header}>
+        <Text style={styles.chartTitle}>Gastos esperados por setor/mês</Text>
+        <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+          <Text style={styles.logoutText}>Logout</Text>
+        </TouchableOpacity>
+      </View>
       <View style={styles.chartContainer}>
         <Text style={styles.yAxisLabel}>VALOR</Text>
         <BarChart
@@ -79,15 +89,29 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
     alignItems: 'center',
   },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    alignItems: 'center',
+  },
   chartTitle: {
     fontSize: 18,
-    textAlign: 'center',
-    marginVertical: 10,
+    fontWeight: 'bold',
+  },
+  logoutButton: {
+    padding: 10,
+    backgroundColor: '#ff5c5c',
+    borderRadius: 5,
+  },
+  logoutText: {
+    color: '#fff',
     fontWeight: 'bold',
   },
   chartContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginTop: 20,
   },
   yAxisLabel: {
     fontSize: 12,
