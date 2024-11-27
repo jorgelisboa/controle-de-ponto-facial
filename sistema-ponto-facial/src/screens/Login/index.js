@@ -45,7 +45,7 @@ export default function Login({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>PONTO.AI</Text>
+      <Text style={styles.title}>CARA NO PONTO 🤙</Text>
       {errorMessage && <Text style={styles.error}>{errorMessage}</Text>}
       <TextInput
         label="Email"
