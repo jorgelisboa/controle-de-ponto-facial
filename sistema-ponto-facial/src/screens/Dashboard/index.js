@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Dimensions, Text, ScrollView, StyleSheet } from 'react-native';
 import { LineChart, BarChart, PieChart } from 'react-native-chart-kit';
 
-export default function Dashboard(props) {
+export default function Dashboard() {
     const screenWidth = Dimensions.get("window").width;
 
     // Dados para o gráfico de linha

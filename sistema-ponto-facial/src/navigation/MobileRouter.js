@@ -10,6 +10,7 @@ import Audit from "../screens/Audit";
 import EditWorkshift from "../screens/EditWorkshift";
 import RegisterCollaborator from "../screens/RegisterCollaborator";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import Dashboard from "../screens/Dashboard";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -30,20 +31,6 @@ function AdminNavigator() {
       }}
     >
       <Tab.Screen
-        name="RegisterCollaborator"
-        component={RegisterCollaborator}
-        options={{
-          tabBarLabel: "Cadastrar",
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons
-              name="account-plus"
-              size={size}
-              color={color}
-            />
-          ),
-        }}
-      />
-      <Tab.Screen
         name="Audit"
         component={Audit}
         options={{
@@ -58,13 +45,27 @@ function AdminNavigator() {
         }}
       />
       <Tab.Screen
-        name="EditWorkshift"
-        component={EditWorkshift}
+        name="Dashboard"
+        component={Dashboard}
         options={{
-          tabBarLabel: "Editar Turno",
+          tabBarLabel: "Dashboard",
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons
-              name="clock-edit"
+              name="view-dashboard"
+              size={size}
+              color={color}
+            />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="RegisterCollaborator"
+        component={RegisterCollaborator}
+        options={{
+          tabBarLabel: "Cadastrar",
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons
+              name="account-plus"
               size={size}
               color={color}
             />
@@ -83,7 +84,7 @@ function RootNavigator({ token, userData }) {
       ) : (
         <Stack.Screen
           name="Main"
-          component={userData?.role === "admin" ? AdminNavigator : MainScreen}
+          component={userData?.role !== "admin" ? AdminNavigator : MainScreen}
         />
       )}
     </Stack.Navigator>
