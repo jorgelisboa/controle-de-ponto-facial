@@ -5,7 +5,7 @@ import { Text } from 'react-native-paper';
 export default function Heatmap() {
     return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <Text>Heatmap</Text>
+            <Text></Text>
         </View>
     );
 };

@@ -11,7 +11,7 @@ export default function App({ onClose }) {
   const [facing, setFacing] = useState("front");
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = useRef(null);
-  const { collaborator } = useContext(UserContext);
+  const { collaborator, getToken } = useContext(UserContext);
 
   if (!permission) {
     // Camera permissions are still loading.
@@ -38,32 +38,23 @@ export default function App({ onClose }) {
     }
 
     try {
-      // Captura a foto
+      const token = await getToken();
       const photo = await cameraRef.current.takePictureAsync({ skipProcessing: true, mute: true });
       console.log("Foto capturada com sucesso:", photo.uri);
 
-      // Comprime a imagem
-      const compressedPhoto = await ImageManipulator.manipulateAsync(
-        photo.uri,
-        [{ resize: { width: photo.width * 0.5, height: photo.height * 0.5 } }],
-        { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
-      );
-      console.log("Foto comprimida com sucesso:", compressedPhoto.uri);
-
-      // Prepara o arquivo para envio
       const formData = new FormData();
       formData.append("collaborator_document", collaborator.document);
-      formData.append("image", {
-        uri: compressedPhoto.uri,
+      formData.append("photo", {
+        uri: photo.uri,
         name: "photo.jpg",
         type: "image/jpeg",
       });
 
-      // Envia a foto para o servidor
       const response = await fetch(`${localhost}/shifts`, {
         method: "POST",
         headers: {
           "Content-Type": "multipart/form-data",
+          "Authorization": `Bearer ${token}`
         },
         body: formData,
       });

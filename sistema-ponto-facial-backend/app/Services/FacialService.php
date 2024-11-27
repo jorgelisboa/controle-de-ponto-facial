@@ -10,7 +10,7 @@ class FacialService
     private function sendFacialRequest($url, $file, $fileName)
     {
         return Http::attach(
-            'image', // O nome do campo do arquivo no request
+            'photo', // O nome do campo do arquivo no request
             file_get_contents($file), // O conteúdo do arquivo
             $fileName // O nome do arquivo
         )->post($url)->throw();
@@ -43,6 +43,7 @@ class FacialService
 
             return $flaskResponse; // Return the response object
         } catch (\Exception $e) {
+            \Log::error('Failed to compare facial data: ' . $e->getMessage());
             throw new \Exception('Não foi possível comparar a face do usuário.');
         }
     }
