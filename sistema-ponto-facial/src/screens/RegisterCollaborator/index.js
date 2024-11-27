@@ -141,25 +141,6 @@ export default function RegisterCollaborator() {
 
   return (
     <View style={styles.container}>
-      <Header
-        userName={userData.name}
-        userImage={userData.photo}
-        onSettingsPress={() =>
-          Alert.alert(
-            "Configurações",
-            "Escolha uma opção",
-            [
-              { text: "Sair", onPress: () => handleSettings("logout") },
-              {
-                text: "Extrair Relatório PDF",
-                onPress: () => handleSettings("extractReport"),
-              },
-              { text: "Cancelar", style: "cancel" },
-            ],
-            { cancelable: true }
-          )
-        }
-      />
       <View style={styles.baseView}>
         <View style={styles.baseInput}>
           <FileInput

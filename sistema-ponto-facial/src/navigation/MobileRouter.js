@@ -83,7 +83,7 @@ function RootNavigator({ token, userData }) {
       ) : (
         <Stack.Screen
           name="Main"
-          component={userData?.role === "admin" ? AdminNavigator : MainScreen}
+          component={userData?.role !== "admin" ? AdminNavigator : MainScreen}
         />
       )}
     </Stack.Navigator>
